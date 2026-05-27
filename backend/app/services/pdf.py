@@ -1,8 +1,6 @@
 import io
 from pypdf import PdfReader
-
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+from app.constants import CHUNK_SIZE, CHUNK_OVERLAP
 
 
 def extract_text(file_bytes: bytes) -> str:
