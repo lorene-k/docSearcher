@@ -52,9 +52,9 @@ npm run dev
 ### Backend `.env`
 
 ```
-GOOGLE_API_KEY=
+GOOGLE_AI_KEY=
 SUPABASE_URL=
-SUPABASE_KEY=
+SUPABASE_PUBLIC_KEY=
 ```
 
 ### Frontend `.env.local`
@@ -68,6 +68,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - No authentication - all users share the same document base (planned for v1.2)
 - PDF only (DOCX and TXT planned for v1.1)
 - Render free tier: backend may have ~30s cold start after inactivity
+- Google API: embedding AI pdf processing limited to 6 pages
+
 
 ## Roadmap
 
@@ -75,3 +77,5 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - v1.2 - User authentication + per-team document isolation (Supabase RLS)
 - v1.3 - On-premise LLM support via Ollama
 - v2.0 - Training modules + quizzes generated from documents
+
+> Note: in the current MVP, document content is sent to Google's API for embedding and generation. For production use with sensitive data, the LLM provider can be swapped for a local Ollama instance.
