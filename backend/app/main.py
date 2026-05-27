@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.upload import upload_router
 
 app = FastAPI(title="docSearcher API")
 
@@ -13,3 +14,5 @@ app.add_middleware(
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+app.include_router(upload_router)

@@ -25,6 +25,6 @@ def create_chunks(text: str) -> list[str]:
     return chunks
 
 
-def processPdf(file_bytes: bytes) -> list[str]:
+def process_pdf(file_bytes: bytes) -> list[str]:
     text = extract_text(file_bytes)
     return create_chunks(text)
