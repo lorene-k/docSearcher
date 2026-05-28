@@ -73,7 +73,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Roadmap
 
-- v1.1 - Multi-format support (DOCX, TXT) + Google Drive sync
+- v1.1 - Multi-format support (DOCX, TXT) + Google Drive sync + add Zustand
 - v1.2 - User authentication + per-team document isolation (Supabase RLS)
 - v1.3 - On-premise LLM support via Ollama
 - v2.0 - Training modules + quizzes generated from documents
