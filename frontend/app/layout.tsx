@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "docSearcher - Base de connaissances interne",
+    title: "docSearcher ",
     description: "Interrogez vos documents internes via IA",
 };
 

@@ -17,9 +17,9 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="flex flex-col flex-1 gap-4 min-h-0 rounded-lg bg-white p-4">
+        <div className="flex flex-col flex-1 gap-4 min-h-0 rounded-lg bg-white ">
             {/* Scrollable message zone */}
-            <div className="flex flex-col gap-4 flex-1 overflow-y-auto py-2">
+            <div className="flex flex-col gap-4 flex-1 overflow-y-auto p-2">
                 {error && <Banner variant="error" message={error} />}
                 {messages.length === 0 && (
                     <p className="text-sm text-gray-400 text-center mt-10">
