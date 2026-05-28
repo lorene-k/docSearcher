@@ -17,38 +17,43 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="flex flex-col gap-6">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <div className="flex flex-col flex-1 gap-4 min-h-0 rounded-lg bg-white p-4">
+            {/* Scrollable message zone */}
+            <div className="flex flex-col gap-4 flex-1 overflow-y-auto py-2">
+                {error && <Banner variant="error" message={error} />}
+                {messages.length === 0 && (
+                    <p className="text-sm text-gray-400 text-center mt-10">
+                        Posez une question sur vos documents.
+                    </p>
+                )}
+                {messages.map((message, index) => (
+                    <MessageBubble
+                        key={index}
+                        text={message.text}
+                        sender={message.sender}
+                        sources={message.sources}
+                    />
+                ))}
+                {loading && <MessageBubble sender="bot" text="" isTyping={true} />}
+            </div>
+
+            {/* Bottom input zone */}
+            <form onSubmit={handleSubmit} className="flex gap-2 items-end pt-4">
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Posez votre question..."
-                    rows={3}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm resize-none transition-shadow"
+                    rows={2}
+                    className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm resize-none transition-shadow"
                 />
                 <button
                     type="submit"
                     disabled={loading || !input.trim()}
-                    className="self-end px-4 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-sm hover:bg-gray-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-sm hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 whitespace-nowrap self-stretch"
                 >
-                    {loading ? "Recherche..." : "Envoyer"}
+                    {loading ? "..." : "Envoyer"}
                 </button>
             </form>
-
-            {error && <Banner variant="error" message={error} />}
-
-            {messages.length > 0 && (
-                <div className="flex flex-col gap-4">
-                    {messages.map((message, index) => (
-                        <MessageBubble
-                            key={index - Date.now()}
-                            text={message.text}
-                            sender={message.sender}
-                            sources={message.sources}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
