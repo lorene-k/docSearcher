@@ -1,5 +1,6 @@
 from supabase import create_client, Client
 from app.config import settings
+from app.constants import SIMILARITY_LOW
 
 _client: Client | None = None
 
@@ -24,7 +25,9 @@ def search_similar_chunks(
         "match_documents",
         {"query_embedding": query_embedding, "match_count": match_count},
     ).execute()
-    return result.data
+    return [
+        chunk for chunk in result.data if chunk["similarity"] >= SIMILARITY_LOW
+    ]
 
 
 def get_filenames() -> list[str]:
