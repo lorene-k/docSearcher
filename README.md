@@ -71,11 +71,18 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - Google API: embedding AI pdf processing limited to 6 pages
 
 
-## Roadmap
+## Coming soon features
 
-- v1.1 - Multi-format support (DOCX, TXT) + Google Drive sync + add Zustand
-- v1.2 - User authentication + per-team document isolation (Supabase RLS)
-- v1.3 - On-premise LLM support via Ollama
-- v2.0 - Training modules + quizzes generated from documents
+- User authentication (add Zustand)
+- Per-team document isolation (Supabase RLS)
+- Chat history - backend side (add Redis)
+- Multi-format support (DOCX, TXT) 
+- Google Drive sync
+
+
+# For production
+- Docker + Nginx reverse proxy + VPS
+- On-premise LLM support via Ollama
+- Training modules + quizzes generated from documents
 
 > Note: in the current MVP, document content is sent to Google's API for embedding and generation. For production use with sensitive data, the LLM provider can be swapped for a local Ollama instance.

@@ -1,11 +1,11 @@
 type Props = {
-  text: string;
+    text: string;
 };
 
 export default function MessageBubble({ text }: Props) {
-  return (
-    <div className="card p-4">
-      <p className="text-sm text-gray-800 whitespace-pre-wrap">{text}</p>
-    </div>
-  );
+    return (
+        <div className="card p-4">
+            <p className="text-sm text-gray-800 whitespace-pre-wrap">{text}</p>
+        </div>
+    );
 }
