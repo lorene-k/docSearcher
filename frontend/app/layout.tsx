@@ -4,34 +4,34 @@ import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+    variable: "--font-geist-mono",
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "docSearcher",
-  description: "Base de connaissances interne",
+    title: "docSearcher - Base de connaissances interne",
+    description: "Interrogez vos documents internes via IA",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-      </body>
-    </html>
-  );
+    return (
+        <html
+            lang="fr"
+            className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        >
+            <body className="min-h-full flex flex-col bg-white text-gray-900">
+                <Navbar />
+                <main className="flex-1">{children}</main>
+            </body>
+        </html>
+    );
 }

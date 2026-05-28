@@ -2,6 +2,7 @@
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { uploadDocument } from "@/lib/api";
+import Banner from "@/components/Banner";
 
 export default function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -53,10 +54,10 @@ export default function UploadZone() {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
+        className={`bg-white border-2 border-dashed rounded-lg p-12 text-center cursor-pointer shadow-sm transition-all duration-200 ${
           isDragging
-            ? "border-gray-400 bg-gray-50"
-            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+            ? "border-blue-400 bg-blue-50 shadow-md"
+            : "border-gray-300 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
         }`}
       >
         <p className="text-gray-600 text-sm">
@@ -77,20 +78,18 @@ export default function UploadZone() {
         <p className="text-sm text-gray-500">Import en cours...</p>
       )}
       {status === "success" && (
-        <div className="flex items-center justify-between text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">
-          <span>Fichier importé avec succès.</span>
-          <button onClick={reset} className="text-green-600 hover:text-green-800 underline text-xs">
-            Importer un autre
-          </button>
-        </div>
+        <Banner
+          variant="success"
+          message="Fichier importé avec succès."
+          action={{ label: "Importer un autre", onClick: reset }}
+        />
       )}
       {status === "error" && (
-        <div className="flex items-center justify-between text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
-          <span>{errorMessage}</span>
-          <button onClick={reset} className="text-red-600 hover:text-red-800 underline text-xs">
-            Réessayer
-          </button>
-        </div>
+        <Banner
+          variant="error"
+          message={errorMessage}
+          action={{ label: "Réessayer", onClick: reset }}
+        />
       )}
     </div>
   );
