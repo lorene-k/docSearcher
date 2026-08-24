@@ -14,8 +14,6 @@ export default function Navbar() {
     const pathname = usePathname();
     const { logout } = useAuth();
 
-    if (pathname === "/login") return null;
-
     return (
         <nav className="bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between">
             <span className="font-semibold text-gray-900">docSearcher</span>
