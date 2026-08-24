@@ -12,7 +12,7 @@ const links = [
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
 
     return (
         <nav className="bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between">
@@ -26,9 +26,15 @@ export default function Navbar() {
                     </li>
                 ))}
                 <li>
-                    <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-                        Déconnexion
-                    </button>
+                    {user ? (
+                        <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                            Déconnexion
+                        </button>
+                    ) : (
+                        <Link href="/login" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                            Connexion
+                        </Link>
+                    )}
                 </li>
             </ul>
         </nav>
