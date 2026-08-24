@@ -61,6 +61,14 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Usage
 
+Run both servers at once:
+
+```bash
+make dev
+```
+
+Or start them separately:
+
 **Backend**
 
 ```bash
