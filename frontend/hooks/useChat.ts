@@ -1,29 +1,27 @@
+"use client";
 
-import { chat } from "@/lib/api";
 import { useState } from "react";
+import { chat } from "@/lib/api";
+import type { Source } from "@/lib/api";
 
 export type Message = {
     text: string;
     sender: "user" | "bot";
-    sources?: {
-        filename: string;
-        chunk_text: string;
-    }[];
-}
+    sources?: Source[];
+};
 
 export function useChat() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const sendMessage = async (input: string) => {
+    const sendMessage = async (input: string, conversationId?: string) => {
+        setError("");
+        setLoading(true);
+        setMessages((prev) => [...prev, { text: input, sender: "user" }]);
         try {
-            setLoading(true);
-            const userMessage: Message = { text: input, sender: "user" };
-            setMessages((prev) => [...prev, userMessage]);
-            const message = await chat(input);
-            const botMessage: Message = { text: message.answer, sender: "bot", sources: message.sources };
-            setMessages((prev) => [...prev, botMessage]);
+            const response = await chat(input, conversationId);
+            setMessages((prev) => [...prev, { text: response.answer, sender: "bot", sources: response.sources }]);
         } catch {
             setError("Une erreur est survenue. Réessayez.");
         } finally {
