@@ -1,88 +1,76 @@
 # docSearcher
 
-Internal knowledge base for small teams. Upload PDF documents and query them via a chat interface powered by RAG (Retrieval-Augmented Generation).
+An internal knowledge base with RAG (Retrieval-Augmented Generation). Upload PDFs, ask questions in natural language, and get answers grounded in the documents, each one tied back to its source excerpt.
 
-## Features
+## Tech Stack
 
-- Upload and index PDF documents
-- Chat interface to query the knowledge base
-- Answers include sources (filename + relevant passage)
-- List of indexed documents
+- **Backend:** FastAPI, Python 3.11+
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS v4
+- **Database & vector store:** Supabase (Postgres + pgvector)
+- **Auth:** Supabase Auth, httpOnly cookies
+- **LLM:** Google Gemini 2.5 Flash (primary), Groq Llama 3.3 70B (fallback)
+- **Embeddings:** Google gemini-embedding-2 (768 dimensions)
 
-## Stack
+## Key features
 
-| Layer | Tech |
-|---|---|
-| Frontend | Next.js + TypeScript + Tailwind CSS |
-| Backend | FastAPI (Python 3.11) |
-| Embeddings + LLM | Google text-embedding-004 + Gemini Flash |
-| Vector store + DB | Supabase (pgvector) |
-| Frontend deployment | Vercel |
-| Backend deployment | Render |
+- **Tiered similarity scoring** : matches above 0.75 are answered directly, matches between 0.55 and 0.75 are answered with a caveat, and anything below 0.55 is declined rather than risking a hallucinated answer
+- **LLM fallback abstraction** : Gemini and Groq sit behind a common `LLMProvider` interface, so a failed or rate-limited call to one provider automatically retries on the other
+- **Persistent conversations** : chat history is stored in Supabase and the last few messages are replayed into the prompt, so the assistant keeps context across turns
+- **Cookie-based auth with silent refresh** : access and refresh tokens live in httpOnly cookies; an axios interceptor catches 401s and transparently refreshes the session before retrying the failed request
+- **Defense-in-depth on row-level security** : the backend uses a service-role key and enforces ownership in application code, but RLS policies are still enabled on `conversations` and `messages` as a second layer
 
-## Requirements
+## Prerequisites
 
-- Python 3.11
-- Node.js 18+
+- Python 3.11+
+- Node.js 20+
+- A Supabase project with the `pgvector` extension enabled and email confirmation disabled for sign-up
+- A Google AI Studio API key
+- A Groq API key (optional, only needed for LLM fallback)
 
-## Getting started
+## Installation
 
-### Backend
+**Database**
+
+Apply the migrations in `backend/supabase/migrations/` to your Supabase project (via the SQL editor or the Supabase CLI). This creates the `documents`, `conversations`, and `messages` tables, the `match_documents` RPC used for similarity search, and the RLS policies.
+
+**Backend**
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # fill in your API keys
-uvicorn app.main:app --reload
 ```
 
-### Frontend
+**Frontend**
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local  # fill in backend URL
-npm run dev
 ```
 
-## Environment variables
+## Configuration
 
-### Backend `.env`
+Copy `backend/.env.example` to `backend/.env` and fill in your Supabase and API keys.
 
-```
-GOOGLE_AI_KEY=
-SUPABASE_URL=
-SUPABASE_PUBLIC_KEY=
-```
+`frontend/.env.local`:
 
-### Frontend `.env.local`
-
-```
+```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-## Known limitations
+## Usage
 
-- No authentication - all users share the same document base (planned for v1.2)
-- PDF only (DOCX and TXT planned for v1.1)
-- Render free tier: backend may have ~30s cold start after inactivity
-- Google API: embedding AI pdf processing limited to 6 pages
+**Backend**
 
+```bash
+cd backend
+uvicorn app.main:app --reload --port 8000
+```
 
-## Coming soon features
+**Frontend**
 
-- User authentication (add Zustand)
-- Per-team document isolation (Supabase RLS)
-- Chat history - backend side (add Redis)
-- Multi-format support (DOCX, TXT) 
-- Google Drive sync
-
-
-# For production
-- Docker + Nginx reverse proxy + VPS
-- On-premise LLM support via Ollama
-- Training modules + quizzes generated from documents
-
-> Note: in the current MVP, document content is sent to Google's API for embedding and generation. For production use with sensitive data, the LLM provider can be swapped for a local Ollama instance.
+```bash
+cd frontend
+npm run dev
+```
