@@ -1,6 +1,8 @@
 # docSearcher
 
-An internal knowledge base with RAG (Retrieval-Augmented Generation). Upload PDFs, ask questions in natural language, and get answers grounded in the documents, each one tied back to its source excerpt.
+An internal knowledge base with RAG (Retrieval-Augmented Generation).
+
+Upload documents, ask questions in natural language, and get sourced answers.
 
 ## Tech Stack
 
