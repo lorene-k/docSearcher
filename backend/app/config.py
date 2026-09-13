@@ -1,6 +1,9 @@
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env")
+
     supabase_public_key: str
     supabase_service_key: str
     supabase_url: str
@@ -8,9 +11,6 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     cors_origins: str = "http://localhost:3000"
     cookie_secure: bool = True
-
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()
