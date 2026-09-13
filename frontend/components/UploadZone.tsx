@@ -7,11 +7,16 @@ import UploadProgress from "@/components/UploadProgress";
 
 export default function UploadZone() {
     const [isDragging, setIsDragging] = useState(false);
+    const [invalidTypeMessage, setInvalidTypeMessage] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const { step, progress, chunksCreated, errorMessage, upload, reset } = useUpload();
 
     const handleFile = (file: File) => {
-        if (file.type !== "application/pdf") return;
+        if (file.type !== "application/pdf") {
+            setInvalidTypeMessage("Seuls les fichiers PDF sont acceptés.");
+            return;
+        }
+        setInvalidTypeMessage("");
         upload(file);
     };
 
@@ -60,6 +65,7 @@ export default function UploadZone() {
             {step === "error" && (
                 <Banner variant="error" message={errorMessage} action={{ label: "Réessayer", onClick: reset }} />
             )}
+            {invalidTypeMessage && <Banner variant="error" message={invalidTypeMessage} />}
         </div>
     );
 }
