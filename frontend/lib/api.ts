@@ -7,11 +7,17 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & { _retried?: boolean 
 
 let refreshPromise: Promise<void> | null = null;
 
+const UNAUTHENTICATED_ENDPOINTS = ["/auth/refresh", "/auth/login", "/auth/register"];
+
 api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
         const originalRequest = error.config as RetriableRequestConfig;
-        if (error.response?.status !== 401 || originalRequest._retried || originalRequest.url === "/auth/refresh") {
+        if (
+            error.response?.status !== 401 ||
+            originalRequest._retried ||
+            UNAUTHENTICATED_ENDPOINTS.includes(originalRequest.url ?? "")
+        ) {
             throw error;
         }
         originalRequest._retried = true;
