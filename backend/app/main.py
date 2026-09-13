@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,6 +9,8 @@ from app.api.conversations import conversations_router
 from app.api.documents import documents_router
 from app.api.upload import upload_router
 from app.config import settings
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="docSearcher API")
 
