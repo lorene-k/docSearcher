@@ -198,6 +198,28 @@ class TestUpload:
         r = client.post("/upload", files={"file": ("t.pdf", b"%PDF", "application/pdf")})
         assert r.status_code == 401
 
+    def test_rejects_non_pdf_extension(self):
+        with patch("app.api.upload.process_pdf") as process_pdf:
+            r = client.post("/upload", files={"file": ("t.txt", b"hello", "application/pdf")}, headers=auth_headers())
+        assert r.status_code == 415
+        process_pdf.assert_not_called()
+
+    def test_rejects_non_pdf_content_type(self):
+        with patch("app.api.upload.process_pdf") as process_pdf:
+            r = client.post("/upload", files={"file": ("t.pdf", b"hello", "text/plain")}, headers=auth_headers())
+        assert r.status_code == 415
+        process_pdf.assert_not_called()
+
+    def test_rejects_file_over_size_limit(self):
+        with patch("app.api.upload.MAX_UPLOAD_BYTES", 10), \
+             patch("app.api.upload.get_filenames") as get_filenames, \
+             patch("app.api.upload.process_pdf") as process_pdf:
+            r = client.post("/upload", files={"file": ("t.pdf", b"%PDF" + b"x" * 20, "application/pdf")},
+                            headers=auth_headers())
+        assert r.status_code == 413
+        get_filenames.assert_not_called()
+        process_pdf.assert_not_called()
+
     def test_success(self):
         with patch("app.api.upload.get_filenames", return_value=[]), \
              patch("app.api.upload.process_pdf", return_value=["c1", "c2"]), \
