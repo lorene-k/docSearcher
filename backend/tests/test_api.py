@@ -151,9 +151,14 @@ class TestConversations:
         assert r.status_code == 200 and len(r.json()) == 1
 
     def test_messages(self):
-        conv = {"id": "c1", "user_id": "user-123", "created_at": "2024-01-01T00:00:00"}
-        msgs = [{"id": "m1", "conversation_id": "c1", "role": "user", "text": "Hi", "sources": [], "created_at": "2024-01-01T00:00:01"}]
+        conversation_id = "c1111111-1111-1111-1111-111111111111"
+        conv = {"id": conversation_id, "user_id": "user-123", "created_at": "2024-01-01T00:00:00"}
+        msgs = [{"id": "m1", "conversation_id": conversation_id, "role": "user", "text": "Hi", "sources": [], "created_at": "2024-01-01T00:00:01"}]
         with patch("app.api.conversations.get_conversation", return_value=conv), \
              patch("app.api.conversations.get_messages", return_value=msgs):
-            r = client.get("/conversations/c1/messages", headers=auth_headers())
+            r = client.get(f"/conversations/{conversation_id}/messages", headers=auth_headers())
         assert r.status_code == 200 and r.json()[0]["text"] == "Hi"
+
+    def test_messages_invalid_conversation_id(self):
+        r = client.get("/conversations/not-a-uuid/messages", headers=auth_headers())
+        assert r.status_code == 422

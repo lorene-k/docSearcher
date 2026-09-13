@@ -1,3 +1,6 @@
+import uuid
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
@@ -7,8 +10,8 @@ from app.middleware.auth import get_current_user
 conversations_router = APIRouter(prefix="/conversations")
 
 
-def require_owned_conversation(conversation_id: str, user_id: str) -> None:
-    conversation = get_conversation(conversation_id)
+def require_owned_conversation(conversation_id: uuid.UUID, user_id: str) -> None:
+    conversation = get_conversation(str(conversation_id))
     if not conversation or conversation["user_id"] != user_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
 
@@ -24,18 +27,18 @@ def list_conversations(user: dict = Depends(get_current_user)) -> list[dict]:
 
 
 @conversations_router.get("/{conversation_id}/messages")
-def list_messages(conversation_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
+def list_messages(conversation_id: uuid.UUID, user: dict = Depends(get_current_user)) -> list[dict]:
     require_owned_conversation(conversation_id, user["sub"])
-    return get_messages(conversation_id)
+    return get_messages(str(conversation_id))
 
 
 class MessageInput(BaseModel):
-    role: str
+    role: Literal["user", "assistant"]
     text: str
     sources: list[dict] | None = None
 
 
 @conversations_router.post("/{conversation_id}/messages", status_code=status.HTTP_201_CREATED)
-def add_message(conversation_id: str, body: MessageInput, user: dict = Depends(get_current_user)) -> dict:
+def add_message(conversation_id: uuid.UUID, body: MessageInput, user: dict = Depends(get_current_user)) -> dict:
     require_owned_conversation(conversation_id, user["sub"])
-    return insert_message(conversation_id, body.role, body.text, body.sources)
+    return insert_message(str(conversation_id), body.role, body.text, body.sources)
