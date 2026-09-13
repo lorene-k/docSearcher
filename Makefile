@@ -28,5 +28,22 @@ test-backend:
 test-frontend:
 			cd frontend && npm test
 
+lint:		lint-backend lint-frontend
 
-.PHONY: all install install-backend install-frontend dev backend frontend test test-backend test-frontend
+lint-backend:
+			cd backend && .venv/bin/ruff check .
+
+lint-frontend:
+			cd frontend && npm run lint
+
+format:		format-backend format-frontend
+
+format-backend:
+			cd backend && .venv/bin/ruff format . && .venv/bin/ruff check --fix .
+
+format-frontend:
+			cd frontend && npm run format
+
+
+.PHONY: all install install-backend install-frontend dev backend frontend test test-backend test-frontend \
+		lint lint-backend lint-frontend format format-backend format-frontend
