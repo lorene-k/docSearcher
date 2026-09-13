@@ -8,7 +8,7 @@ def extract_text(file_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(file_bytes))
     if len(reader.pages) > MAX_PDF_PAGES:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"PDF exceeds {MAX_PDF_PAGES} page limit",
         )
     text = ""

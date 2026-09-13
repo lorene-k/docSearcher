@@ -19,7 +19,7 @@ async def handle_upload(file: UploadFile, _user: dict = Depends(get_current_user
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File exceeds 20 MB limit")
+        raise HTTPException(status_code=status.HTTP_413_CONTENT_TOO_LARGE, detail="File exceeds 20 MB limit")
 
     existing_filenames = await run_in_threadpool(get_filenames)
     if filename in existing_filenames:
