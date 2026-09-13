@@ -1,13 +1,16 @@
 """Integration tests for all API endpoints with mocked Supabase and Google clients."""
 from unittest.mock import patch
+
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import HTTPException, status
+from fastapi.testclient import TestClient
 
 from app.main import app
 from app.middleware.auth import get_current_user
 
 client = TestClient(app)
+
+OTHER_USERS_CONVERSATION_ID = "c2222222-2222-2222-2222-222222222222"
 
 
 @pytest.fixture(autouse=True)
@@ -126,6 +129,22 @@ class TestChat:
             r = client.post("/chat", json={"text": "What?"}, headers=auth_headers())
         assert r.status_code == 200 and r.json()["answer"] == "42"
 
+    def test_other_users_conversation_returns_404(self):
+        conv = {"id": OTHER_USERS_CONVERSATION_ID, "user_id": "someone-else", "created_at": "2024-01-01T00:00:00"}
+        with patch("app.services.rag.get_conversation", return_value=conv), \
+             patch("app.services.rag.get_messages") as get_messages, \
+             patch("app.services.rag.embed_query") as embed_query, \
+             patch("app.services.rag.insert_message") as insert_message:
+            r = client.post(
+                "/chat",
+                json={"text": "leak it", "conversation_id": OTHER_USERS_CONVERSATION_ID},
+                headers=auth_headers(),
+            )
+        assert r.status_code == 404
+        get_messages.assert_not_called()
+        embed_query.assert_not_called()
+        insert_message.assert_not_called()
+
 
 class TestDocuments:
     def test_requires_auth(self):
@@ -172,4 +191,39 @@ class TestConversations:
 
     def test_messages_invalid_conversation_id(self):
         r = client.get("/conversations/not-a-uuid/messages", headers=auth_headers())
+        assert r.status_code == 422
+
+    def test_messages_of_other_users_conversation_returns_404(self):
+        conv = {"id": OTHER_USERS_CONVERSATION_ID, "user_id": "someone-else", "created_at": "2024-01-01T00:00:00"}
+        with patch("app.api.conversations.get_conversation", return_value=conv), \
+             patch("app.api.conversations.get_messages") as get_messages:
+            r = client.get(f"/conversations/{OTHER_USERS_CONVERSATION_ID}/messages", headers=auth_headers())
+        assert r.status_code == 404
+        get_messages.assert_not_called()
+
+    def test_messages_of_nonexistent_conversation_returns_404(self):
+        with patch("app.api.conversations.get_conversation", return_value=None), \
+             patch("app.api.conversations.get_messages") as get_messages:
+            r = client.get(f"/conversations/{OTHER_USERS_CONVERSATION_ID}/messages", headers=auth_headers())
+        assert r.status_code == 404
+        get_messages.assert_not_called()
+
+    def test_add_message_to_other_users_conversation_returns_404(self):
+        conv = {"id": OTHER_USERS_CONVERSATION_ID, "user_id": "someone-else", "created_at": "2024-01-01T00:00:00"}
+        with patch("app.api.conversations.get_conversation", return_value=conv), \
+             patch("app.api.conversations.insert_message") as insert_message:
+            r = client.post(
+                f"/conversations/{OTHER_USERS_CONVERSATION_ID}/messages",
+                json={"role": "user", "text": "injected"},
+                headers=auth_headers(),
+            )
+        assert r.status_code == 404
+        insert_message.assert_not_called()
+
+    def test_add_message_rejects_invalid_role(self):
+        r = client.post(
+            f"/conversations/{OTHER_USERS_CONVERSATION_ID}/messages",
+            json={"role": "system", "text": "hi"},
+            headers=auth_headers(),
+        )
         assert r.status_code == 422
