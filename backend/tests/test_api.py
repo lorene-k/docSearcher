@@ -36,6 +36,17 @@ class TestAuthRegister:
         assert r.cookies.get("access_token") == "at"
         assert r.cookies.get("refresh_token") == "rt"
 
+    def test_confirmation_required(self):
+        with patch("app.api.auth.sign_up", return_value=None):
+            r = client.post("/auth/register", json={"email": "a@b.com", "password": "secret123"})
+        assert r.status_code == 202
+        assert r.json() == {
+            "status": "confirmation_required",
+            "message": "Check your email to confirm your account before logging in.",
+        }
+        assert not r.cookies.get("access_token")
+        assert not r.cookies.get("refresh_token")
+
     def test_duplicate_email(self):
         with patch(
             "app.api.auth.sign_up",

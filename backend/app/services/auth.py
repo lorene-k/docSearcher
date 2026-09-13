@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from app.db.supabase import get_auth_client
 
 
-def sign_up(email: str, password: str) -> dict:
+def sign_up(email: str, password: str) -> dict | None:
     try:
         res = get_auth_client().auth.sign_up({"email": email, "password": password})
     except AuthApiError as e:
@@ -13,10 +13,9 @@ def sign_up(email: str, password: str) -> dict:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed")
 
     if res.session is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Registration requires email confirmation; disable it in the Supabase dashboard for this app",
-        )
+        # Email confirmation is enabled for this project: the account was created
+        # but there is no session yet until the user confirms via email.
+        return None
     return {
         "access_token": res.session.access_token,
         "refresh_token": res.session.refresh_token,

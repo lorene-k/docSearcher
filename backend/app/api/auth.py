@@ -24,6 +24,12 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str,
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit(5, 60))])
 def register(body: AuthInput, response: Response) -> dict:
     tokens = sign_up(body.email, body.password)
+    if tokens is None:
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {
+            "status": "confirmation_required",
+            "message": "Check your email to confirm your account before logging in.",
+        }
     _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"email": tokens["email"]}
 
