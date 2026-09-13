@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, UploadFile, APIRouter, status
 from starlette.concurrency import run_in_threadpool
 
-from app.db.supabase import insert_chunks
+from app.db.supabase import get_filenames, insert_chunks
 from app.middleware.auth import get_current_user
 from app.services.embedding import embed_chunks
 from app.services.pdf import process_pdf
@@ -20,6 +20,13 @@ async def handle_upload(file: UploadFile, _user: dict = Depends(get_current_user
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File exceeds 20 MB limit")
+
+    existing_filenames = await run_in_threadpool(get_filenames)
+    if filename in existing_filenames:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"A document named '{filename}' already exists - delete it first if you want to replace it",
+        )
 
     chunks = await run_in_threadpool(process_pdf, content)
     embeddings = await run_in_threadpool(embed_chunks, chunks)

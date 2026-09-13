@@ -93,11 +93,17 @@ class TestUpload:
         assert r.status_code == 401
 
     def test_success(self):
-        with patch("app.api.upload.process_pdf", return_value=["c1", "c2"]), \
+        with patch("app.api.upload.get_filenames", return_value=[]), \
+             patch("app.api.upload.process_pdf", return_value=["c1", "c2"]), \
              patch("app.api.upload.embed_chunks", return_value=[[0.1]*768, [0.2]*768]), \
              patch("app.api.upload.insert_chunks", return_value=None):
             r = client.post("/upload", files={"file": ("t.pdf", b"%PDF", "application/pdf")}, headers=auth_headers())
         assert r.status_code == 200 and r.json()["chunks_created"] == 2
+
+    def test_duplicate_filename_rejected(self):
+        with patch("app.api.upload.get_filenames", return_value=["t.pdf"]):
+            r = client.post("/upload", files={"file": ("t.pdf", b"%PDF", "application/pdf")}, headers=auth_headers())
+        assert r.status_code == 409
 
 
 class TestChat:
