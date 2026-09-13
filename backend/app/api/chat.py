@@ -14,5 +14,5 @@ chat_router = APIRouter()
 
 
 @chat_router.post("/chat")
-async def handle_chat(input: ChatInput, user: dict = Depends(get_current_user)) -> dict:
+def handle_chat(input: ChatInput, user: dict = Depends(get_current_user)) -> dict:
     return get_answer(input.text, user["sub"], conversation_id=input.conversation_id)

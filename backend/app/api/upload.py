@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, UploadFile, APIRouter, status
+from starlette.concurrency import run_in_threadpool
 
 from app.db.supabase import insert_chunks
 from app.middleware.auth import get_current_user
@@ -20,11 +21,11 @@ async def handle_upload(file: UploadFile, _user: dict = Depends(get_current_user
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File exceeds 20 MB limit")
 
-    chunks = process_pdf(content)
-    embeddings = embed_chunks(chunks)
+    chunks = await run_in_threadpool(process_pdf, content)
+    embeddings = await run_in_threadpool(embed_chunks, chunks)
     chunk_data = [
         {"filename": filename, "chunk_text": chunk, "embedding": embedding}
         for chunk, embedding in zip(chunks, embeddings)
     ]
-    insert_chunks(filename, chunk_data)
+    await run_in_threadpool(insert_chunks, filename, chunk_data)
     return {"message": "file uploaded", "chunks_created": len(chunk_data)}
