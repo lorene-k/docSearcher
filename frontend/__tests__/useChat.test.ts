@@ -23,7 +23,7 @@ describe("useChat", () => {
     it("adds user message and bot reply on success", async () => {
         mockChat.mockResolvedValueOnce({
             answer: "Voici la réponse.",
-            sources: [{ filename: "doc.pdf", page: 1, excerpt: "...", score: 0.9 }],
+            sources: [{ filename: "doc.pdf", chunk_text: "...", relevance: "high" }],
         });
 
         const { result } = renderHook(() => useChat());
@@ -38,6 +38,22 @@ describe("useChat", () => {
         expect(result.current.messages[1].text).toBe("Voici la réponse.");
         expect(result.current.messages[1].sources).toHaveLength(1);
         expect(result.current.loading).toBe(false);
+    });
+
+    it("keeps each source's relevance so the UI can show high and low confidence", async () => {
+        const sources = [
+            { filename: "high.pdf", chunk_text: "strong match", relevance: "high" as const },
+            { filename: "low.pdf", chunk_text: "weak match", relevance: "low" as const },
+        ];
+        mockChat.mockResolvedValueOnce({ answer: "ok", sources });
+
+        const { result } = renderHook(() => useChat());
+
+        await act(async () => {
+            await result.current.sendMessage("question");
+        });
+
+        expect(result.current.messages[1].sources).toEqual(sources);
     });
 
     it("passes conversationId to chat()", async () => {
