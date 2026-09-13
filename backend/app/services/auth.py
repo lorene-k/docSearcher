@@ -17,7 +17,12 @@ def sign_up(email: str, password: str) -> dict:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Registration requires email confirmation; disable it in the Supabase dashboard for this app",
         )
-    return {"access_token": res.session.access_token, "refresh_token": res.session.refresh_token, "email": email}
+    return {
+        "access_token": res.session.access_token,
+        "refresh_token": res.session.refresh_token,
+        "expires_in": res.session.expires_in,
+        "email": email,
+    }
 
 
 def sign_in(email: str, password: str) -> dict:
@@ -25,7 +30,12 @@ def sign_in(email: str, password: str) -> dict:
         res = get_auth_client().auth.sign_in_with_password({"email": email, "password": password})
     except AuthApiError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    return {"access_token": res.session.access_token, "refresh_token": res.session.refresh_token, "email": email}
+    return {
+        "access_token": res.session.access_token,
+        "refresh_token": res.session.refresh_token,
+        "expires_in": res.session.expires_in,
+        "email": email,
+    }
 
 
 def refresh(refresh_token: str) -> dict:
@@ -33,7 +43,11 @@ def refresh(refresh_token: str) -> dict:
         res = get_auth_client().auth.refresh_session(refresh_token)
     except AuthApiError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    return {"access_token": res.session.access_token, "refresh_token": res.session.refresh_token}
+    return {
+        "access_token": res.session.access_token,
+        "refresh_token": res.session.refresh_token,
+        "expires_in": res.session.expires_in,
+    }
 
 
 def get_user_from_token(token: str) -> dict:

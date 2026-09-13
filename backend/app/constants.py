@@ -14,3 +14,7 @@ MATCH_CANDIDATES = 20
 
 ACCESS_TOKEN_COOKIE = "access_token"
 REFRESH_TOKEN_COOKIE = "refresh_token"
+# Supabase doesn't expose a clean refresh-token expiry in the session response;
+# 30 days matches typical Supabase JWT defaults - reconcile with the actual
+# project's refresh token expiry setting if it differs.
+REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30

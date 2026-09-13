@@ -28,7 +28,7 @@ def test_health():
 
 class TestAuthRegister:
     def test_success(self):
-        tokens = {"access_token": "at", "refresh_token": "rt", "email": "a@b.com"}
+        tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
         with patch("app.api.auth.sign_up", return_value=tokens):
             r = client.post("/auth/register", json={"email": "a@b.com", "password": "secret123"})
         assert r.status_code == 201
@@ -47,7 +47,7 @@ class TestAuthRegister:
 
 class TestAuthLogin:
     def test_success(self):
-        tokens = {"access_token": "at", "refresh_token": "rt", "email": "a@b.com"}
+        tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
         with patch("app.api.auth.sign_in", return_value=tokens):
             r = client.post("/auth/login", json={"email": "a@b.com", "password": "mypass"})
         assert r.status_code == 200
@@ -68,7 +68,7 @@ class TestAuthRefresh:
         assert client.post("/auth/refresh").status_code == 401
 
     def test_success_rotates_cookies(self):
-        tokens = {"access_token": "new-at", "refresh_token": "new-rt", "email": "a@b.com"}
+        tokens = {"access_token": "new-at", "refresh_token": "new-rt", "expires_in": 3600, "email": "a@b.com"}
         client.cookies.set("refresh_token", "old-rt")
         with patch("app.api.auth.refresh", return_value=tokens):
             r = client.post("/auth/refresh")

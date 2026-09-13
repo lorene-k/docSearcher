@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
 
 from app.config import settings
-from app.constants import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE
+from app.constants import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, REFRESH_TOKEN_MAX_AGE
 from app.middleware.rate_limit import rate_limit
 from app.services.auth import refresh, sign_in, sign_up
 
@@ -16,22 +16,22 @@ class AuthInput(BaseModel):
     password: str
 
 
-def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
-    response.set_cookie(ACCESS_TOKEN_COOKIE, access_token, **COOKIE_KWARGS)
-    response.set_cookie(REFRESH_TOKEN_COOKIE, refresh_token, **COOKIE_KWARGS)
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str, access_max_age: int) -> None:
+    response.set_cookie(ACCESS_TOKEN_COOKIE, access_token, max_age=access_max_age, **COOKIE_KWARGS)
+    response.set_cookie(REFRESH_TOKEN_COOKIE, refresh_token, max_age=REFRESH_TOKEN_MAX_AGE, **COOKIE_KWARGS)
 
 
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit(5, 60))])
 def register(body: AuthInput, response: Response) -> dict:
     tokens = sign_up(body.email, body.password)
-    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
+    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"email": tokens["email"]}
 
 
 @auth_router.post("/login", dependencies=[Depends(rate_limit(10, 60))])
 def login(body: AuthInput, response: Response) -> dict:
     tokens = sign_in(body.email, body.password)
-    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
+    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"email": tokens["email"]}
 
 
@@ -41,7 +41,7 @@ def refresh_route(request: Request, response: Response) -> dict:
     if not refresh_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No refresh token")
     tokens = refresh(refresh_token)
-    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
+    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"message": "refreshed"}
 
 
