@@ -1,9 +1,13 @@
+import logging
+
 from fastapi import HTTPException, status
 
 from app.services.embedding import embed_query
 from app.db.supabase import get_conversation, search_similar_chunks, get_messages, insert_message
 from app.services.llm import generate_with_fallback
 from app.constants import SIMILARITY_HIGH, SIMILARITY_LOW
+
+logger = logging.getLogger(__name__)
 
 HISTORY_WINDOW = 5
 
@@ -87,7 +91,14 @@ def get_answer(query: str, user_id: str, conversation_id: str | None = None) -> 
         answer = "Désolé, je n'ai trouvé aucune information pertinente dans les documents disponibles."
         sources: list[dict] = []
     else:
-        answer = generate_with_fallback(prompt)
+        try:
+            answer = generate_with_fallback(prompt)
+        except RuntimeError as exc:
+            logger.exception("LLM generation failed for query: %s", query)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The assistant is temporarily unavailable. Please try again shortly.",
+            ) from exc
         sources = [
             {"filename": c["filename"], "chunk_text": c["chunk_text"], "relevance": "high"}
             for c in chunks_high
