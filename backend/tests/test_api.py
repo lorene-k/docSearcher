@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from supabase_auth.errors import AuthApiError
 
 from app.main import app
+from app.middleware import rate_limit as rate_limit_module
 from app.middleware.auth import get_current_user
 
 client = TestClient(app)
@@ -17,9 +18,11 @@ OTHER_USERS_CONVERSATION_ID = "c2222222-2222-2222-2222-222222222222"
 
 @pytest.fixture(autouse=True)
 def _clear_dependency_overrides():
+    rate_limit_module._hits.clear()
     yield
     app.dependency_overrides.clear()
     client.cookies.clear()
+    rate_limit_module._hits.clear()
 
 
 def auth_headers(user_id="user-123", email="test@example.com"):
@@ -126,6 +129,52 @@ class TestAuthMiddleware:
         assert r.status_code == 200
         auth_client.auth.get_user.assert_called_once_with("valid")
         get_conversations.assert_called_once_with("user-abc")
+
+
+class TestRateLimit:
+    def test_register_is_limited_to_5_per_minute(self):
+        with patch("app.api.auth.sign_up", return_value=None):
+            codes = [client.post("/auth/register", json={"email": "a@b.com", "password": "secret123"}).status_code
+                     for _ in range(6)]
+        assert codes == [202] * 5 + [429]
+
+    def test_login_is_limited_to_10_per_minute(self):
+        tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
+        with patch("app.api.auth.sign_in", return_value=tokens):
+            codes = [client.post("/auth/login", json={"email": "a@b.com", "password": "pw"}).status_code
+                     for _ in range(11)]
+        assert codes == [200] * 10 + [429]
+
+    def test_limits_are_tracked_per_route(self):
+        tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
+        with patch("app.api.auth.sign_up", return_value=None), patch("app.api.auth.sign_in", return_value=tokens):
+            for _ in range(5):
+                client.post("/auth/register", json={"email": "a@b.com", "password": "secret123"})
+            assert client.post("/auth/login", json={"email": "a@b.com", "password": "pw"}).status_code == 200
+
+    def test_window_expiry_allows_requests_again(self):
+        request = SimpleNamespace(client=SimpleNamespace(host="1.2.3.4"), url=SimpleNamespace(path="/auth/login"))
+        limiter = rate_limit_module.rate_limit(2, 60)
+        with patch("app.middleware.rate_limit.time") as fake_time:
+            fake_time.monotonic.return_value = 1000.0
+            limiter(request)
+            limiter(request)
+            with pytest.raises(HTTPException) as exc:
+                limiter(request)
+            assert exc.value.status_code == 429
+            fake_time.monotonic.return_value = 1061.0
+            limiter(request)
+
+    def test_limits_are_tracked_per_ip(self):
+        limiter = rate_limit_module.rate_limit(1, 60)
+
+        def request_from(ip):
+            return SimpleNamespace(client=SimpleNamespace(host=ip), url=SimpleNamespace(path="/auth/login"))
+
+        limiter(request_from("1.1.1.1"))
+        limiter(request_from("2.2.2.2"))
+        with pytest.raises(HTTPException):
+            limiter(request_from("1.1.1.1"))
 
 
 class TestUpload:
