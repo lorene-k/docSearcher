@@ -48,9 +48,10 @@ def get_filenames() -> list[str]:
     return list({row["filename"] for row in result.data})
 
 
-def delete_document(filename: str) -> None:
+def delete_document(filename: str) -> bool:
     client = get_client()
-    client.table("documents").delete().eq("filename", filename).execute()
+    result = client.table("documents").delete().eq("filename", filename).execute()
+    return bool(result.data)
 
 
 # ── conversations ──────────────────────────────────────────────────────────────

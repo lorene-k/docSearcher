@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.db.supabase import delete_document, get_filenames
 from app.middleware.auth import get_current_user
@@ -13,5 +13,7 @@ def handle_documents(_user: dict = Depends(get_current_user)) -> list[str]:
 
 @documents_router.delete("/documents/{filename}")
 def handle_delete_document(filename: str, _user: dict = Depends(get_current_user)) -> dict:
-    delete_document(filename)
+    deleted = delete_document(filename)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Document '{filename}' not found")
     return {"message": "document deleted"}

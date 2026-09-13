@@ -127,9 +127,14 @@ class TestDocuments:
         assert r.status_code == 200 and set(r.json()) == {"a.pdf", "b.pdf"}
 
     def test_delete(self):
-        with patch("app.api.documents.delete_document", return_value=None):
+        with patch("app.api.documents.delete_document", return_value=True):
             r = client.delete("/documents/test.pdf", headers=auth_headers())
         assert r.status_code == 200 and r.json()["message"] == "document deleted"
+
+    def test_delete_not_found(self):
+        with patch("app.api.documents.delete_document", return_value=False):
+            r = client.delete("/documents/missing.pdf", headers=auth_headers())
+        assert r.status_code == 404
 
 
 class TestConversations:
