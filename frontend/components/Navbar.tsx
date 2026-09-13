@@ -16,7 +16,7 @@ export default function Navbar() {
 
     return (
         <nav className="bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between">
-            <span className="font-semibold text-gray-900">docSearcher</span>
+            <Link href="/" className="font-semibold text-gray-900">docSearcher</Link>
             <ul className="flex gap-6 items-center">
                 {links.map(({ href, label }) => (
                     <li key={href}>
