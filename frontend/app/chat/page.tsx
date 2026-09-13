@@ -9,7 +9,7 @@ function ChatPageInner() {
     const { conversations, activeId, historyMessages, loading, selectConversation, newConversation } = useConversations();
 
     return (
-        <div className="flex h-[calc(100vh-57px)] px-6 py-6 max-w-5xl mx-auto w-full gap-6">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-57px)] px-4 sm:px-6 py-6 max-w-5xl mx-auto w-full gap-6">
             <ConversationSidebar
                 conversations={conversations}
                 activeId={activeId}

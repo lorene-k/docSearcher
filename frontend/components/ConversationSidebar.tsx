@@ -12,7 +12,7 @@ type Props = {
 
 export default function ConversationSidebar({ conversations, activeId, loading, onSelect, onNew }: Props) {
     return (
-        <aside className="w-48 shrink-0 flex flex-col gap-2 border-r border-gray-100 pr-4">
+        <aside className="hidden md:flex md:flex-col w-48 shrink-0 gap-2 border-r border-gray-100 pr-4">
             <button onClick={onNew} className="w-full text-left px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors">
                 + Nouvelle
             </button>
