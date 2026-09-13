@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 from supabase_auth.errors import AuthApiError
 
+from app.config import settings
 from app.main import app
 from app.middleware import rate_limit as rate_limit_module
 from app.middleware.auth import get_current_user
@@ -175,6 +176,21 @@ class TestRateLimit:
         limiter(request_from("2.2.2.2"))
         with pytest.raises(HTTPException):
             limiter(request_from("1.1.1.1"))
+
+
+class TestCors:
+    def test_allowed_origin_gets_credentialed_cors_headers(self):
+        origin = settings.cors_origins.split(",")[0].strip()
+        r = client.options(
+            "/documents",
+            headers={"Origin": origin, "Access-Control-Request-Method": "GET"},
+        )
+        assert r.headers.get("access-control-allow-origin") == origin
+        assert r.headers.get("access-control-allow-credentials") == "true"
+
+    def test_unknown_origin_gets_no_cors_headers(self):
+        r = client.get("/health", headers={"Origin": "https://evil.example"})
+        assert "access-control-allow-origin" not in r.headers
 
 
 class TestUpload:
