@@ -81,7 +81,7 @@ describe("useAuth", () => {
         expect(mockPush).not.toHaveBeenCalled();
     });
 
-    it("register() saves email, sets user, redirects to /chat", async () => {
+    it("register() does not create a session or redirect on success, and flags confirmation as sent", async () => {
         mockRegister.mockResolvedValueOnce({ email: "new@example.com" });
 
         const { result } = renderHook(() => useAuth());
@@ -90,12 +90,13 @@ describe("useAuth", () => {
             await result.current.register("new@example.com", "pass456");
         });
 
-        expect(localStorageMock.getItem("user_email")).toBe("new@example.com");
-        expect(result.current.user).toEqual({ email: "new@example.com" });
-        expect(mockPush).toHaveBeenCalledWith("/chat");
+        expect(localStorageMock.getItem("user_email")).toBeNull();
+        expect(result.current.user).toBeNull();
+        expect(mockPush).not.toHaveBeenCalled();
+        expect(result.current.confirmationSent).toBe(true);
     });
 
-    it("register() sets error on failure", async () => {
+    it("register() sets error on failure and does not flag confirmation as sent", async () => {
         mockRegister.mockRejectedValueOnce(new Error("409"));
 
         const { result } = renderHook(() => useAuth());
@@ -105,6 +106,7 @@ describe("useAuth", () => {
         });
 
         expect(result.current.error).toBe("Cet email est déjà utilisé ou une erreur est survenue.");
+        expect(result.current.confirmationSent).toBe(false);
     });
 
     it("logout() calls the backend, clears localStorage, redirects to /login", async () => {

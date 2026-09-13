@@ -11,6 +11,7 @@ export function useAuth() {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [confirmationSent, setConfirmationSent] = useState(false);
 
     useEffect(() => {
         const email = localStorage.getItem("user_email");
@@ -39,16 +40,18 @@ export function useAuth() {
     const register = useCallback(async (email: string, password: string) => {
         setLoading(true);
         setError("");
+        setConfirmationSent(false);
         try {
             await apiRegister(email, password);
-            saveSession(email);
-            router.push("/chat");
+            setConfirmationSent(true);
         } catch {
             setError("Cet email est déjà utilisé ou une erreur est survenue.");
         } finally {
             setLoading(false);
         }
-    }, [router]);
+    }, []);
+
+    const clearConfirmation = useCallback(() => setConfirmationSent(false), []);
 
     const logout = useCallback(async () => {
         try {
@@ -62,5 +65,5 @@ export function useAuth() {
         }
     }, [router]);
 
-    return { user, loading, error, login, register, logout };
+    return { user, loading, error, confirmationSent, login, register, logout, clearConfirmation };
 }
