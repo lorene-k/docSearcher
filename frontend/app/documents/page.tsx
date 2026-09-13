@@ -61,7 +61,7 @@ function DocumentsPageInner() {
                 <ul className="flex flex-col gap-2">
                     {filtered.map((name) => (
                         <li key={name} className="card px-4 py-3 flex items-center justify-between">
-                            <span className="text-sm text-gray-700 truncate">{name}</span>
+                            <span className="text-base text-gray-700 truncate">{name}</span>
                             {confirming === name ? (
                                 <div className="flex items-center gap-2 shrink-0 ml-4">
                                     <span className="text-xs text-gray-500">Supprimer ?</span>

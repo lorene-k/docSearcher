@@ -15,7 +15,7 @@ export default function MessageBubble({ text, sender, sources, isTyping }: Props
 
     return (
         <div className={`flex animate-fade-slide-in ${isUser ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[95%] rounded-lg px-4 py-3 text-sm ${isUser
+            <div className={`max-w-[95%] rounded-lg px-4 py-3 text-base ${isUser
                 ? "bg-gray-300 text-black"
                 : "bg-gray-100 text-gray-800"
                 }`}>

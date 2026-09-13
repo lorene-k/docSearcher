@@ -5,7 +5,7 @@ export default function Home() {
         <div className="page-container flex flex-col items-center text-center gap-6 pt-20">
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-3">docSearcher</h1>
-                <p className="text-gray-500 text-sm max-w-md">
+                <p className="text-gray-500 text-base max-w-md">
                     Interrogez vos documents internes par langage naturel. Importez des PDFs, posez vos questions, obtenez des réponses sourcées.
                 </p>
             </div>
