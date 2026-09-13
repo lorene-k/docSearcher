@@ -56,6 +56,11 @@ Technical decisions for docSearcher, organized by scope
 - Justification: standard choice for an async FastAPI app
 - Alternatives: unittest (more boilerplate, no async fixtures out of the box)
 
+### Python version: 3.14
+- Context & choice: the docs said 3.11 while the venv actually ran 3.14, and `.python-version` was gitignored so nothing enforced either. The backend now targets 3.14, pinned in a committed `backend/.python-version`, the Makefile's venv creation, and Ruff's target version
+- Justification: it's the version the whole test suite already runs on, Render's default for new Python services since February 2026, and every dependency in `requirements.txt` ships a prebuilt wheel for it
+- Alternatives: 3.11 (only ever present in docs, never what the code ran on); 3.12 (widely supported, but would mean moving off the version everything is already tested on for no concrete gain)
+
 ### LLM model IDs re-verified: gemini-embedding-2 + gemini-2.5-flash, unchanged
 - Context & choice: the audit couldn't confirm from source alone whether `gemini-embedding-2` and `gemini-2.5-flash` (`backend/app/constants.py`) were still valid, current model IDs, so they were live-checked directly against the Google AI API on 2026-09-13 using the project's real key, rather than trusted from search results
 - Justification: both IDs exist and are callable today (`embedContent` and `generateContent` actions confirmed present on each); a live API call is authoritative where docs pages and search results were inconsistent with each other

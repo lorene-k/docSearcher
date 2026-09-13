@@ -3,7 +3,7 @@ all:		dev
 install:	install-backend install-frontend
 
 install-backend:
-			cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+			cd backend && python3.14 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 install-frontend:
 			cd frontend && npm install

@@ -6,7 +6,7 @@ Upload documents, ask questions in natural language, and get sourced answers.
 
 ## Tech Stack
 
-- **Backend:** FastAPI, Python 3.11+
+- **Backend:** FastAPI, Python 3.14
 - **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS v4
 - **Database & vector store:** Supabase (Postgres + pgvector)
 - **Auth:** Supabase Auth, httpOnly cookies
@@ -23,7 +23,7 @@ Upload documents, ask questions in natural language, and get sourced answers.
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.14
 - Node.js 20+
 - A Supabase project with the `pgvector` extension enabled and email confirmation disabled for sign-up
 - A Google AI Studio API key

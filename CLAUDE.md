@@ -16,7 +16,7 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 
 ## Stack
 - Frontend: Next.js + TypeScript + Tailwind CSS
-- Backend: FastAPI (Python 3.11)
+- Backend: FastAPI (Python 3.14)
 - Embeddings + LLM: Google (gemini-embedding-2 + gemini-2.5-flash)
 - Vector store + DB: Supabase (pgvector)
 - Deployment: Vercel (frontend) + Render (backend) - not deployed yet
