@@ -1,0 +1,6 @@
+target-version = "py311"
+line-length = 120
+
+[lint.flake8-bugbear]
+# FastAPI's dependency injection requires calls like Depends() in argument defaults.
+extend-immutable-calls = ["fastapi.Depends"]

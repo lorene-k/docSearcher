@@ -15,6 +15,7 @@ node_modules
 
 # testing
 coverage
+.ruff_cache
 
 # next.js
 .next/
