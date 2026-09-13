@@ -1,9 +1,11 @@
 """Integration tests for all API endpoints with mocked Supabase and Google clients."""
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
+from supabase_auth.errors import AuthApiError
 
 from app.main import app
 from app.middleware.auth import get_current_user
@@ -99,6 +101,31 @@ class TestAuthLogout:
         assert r.status_code == 200
         assert not r.cookies.get("access_token")
         assert not r.cookies.get("refresh_token")
+
+
+class TestAuthMiddleware:
+    """Exercises the real get_current_user instead of overriding it."""
+
+    def test_invalid_token_is_rejected(self):
+        auth_client = MagicMock()
+        auth_client.auth.get_user.side_effect = AuthApiError("invalid JWT", 401, None)
+        client.cookies.set("access_token", "forged-or-expired")
+        with patch("app.services.auth.get_auth_client", return_value=auth_client), \
+             patch("app.api.documents.get_filenames") as get_filenames:
+            r = client.get("/documents")
+        assert r.status_code == 401
+        get_filenames.assert_not_called()
+
+    def test_valid_token_resolves_the_calling_user(self):
+        auth_client = MagicMock()
+        auth_client.auth.get_user.return_value = SimpleNamespace(user=SimpleNamespace(id="user-abc", email="a@b.com"))
+        client.cookies.set("access_token", "valid")
+        with patch("app.services.auth.get_auth_client", return_value=auth_client), \
+             patch("app.api.conversations.get_conversations", return_value=[]) as get_conversations:
+            r = client.get("/conversations")
+        assert r.status_code == 200
+        auth_client.auth.get_user.assert_called_once_with("valid")
+        get_conversations.assert_called_once_with("user-abc")
 
 
 class TestUpload:
