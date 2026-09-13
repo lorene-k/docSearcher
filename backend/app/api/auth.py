@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
 
 from app.config import settings
 from app.constants import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE
+from app.middleware.rate_limit import rate_limit
 from app.services.auth import refresh, sign_in, sign_up
 
 auth_router = APIRouter(prefix="/auth")
@@ -20,14 +21,14 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
     response.set_cookie(REFRESH_TOKEN_COOKIE, refresh_token, **COOKIE_KWARGS)
 
 
-@auth_router.post("/register", status_code=status.HTTP_201_CREATED)
+@auth_router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit(5, 60))])
 def register(body: AuthInput, response: Response) -> dict:
     tokens = sign_up(body.email, body.password)
     _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
     return {"email": tokens["email"]}
 
 
-@auth_router.post("/login")
+@auth_router.post("/login", dependencies=[Depends(rate_limit(10, 60))])
 def login(body: AuthInput, response: Response) -> dict:
     tokens = sign_in(body.email, body.password)
     _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"])
