@@ -12,7 +12,7 @@ const config: Config = {
     },
     testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
     coverageDirectory: "coverage",
-    collectCoverageFrom: ["hooks/**/*.ts", "components/**/*.tsx"],
+    collectCoverageFrom: ["hooks/**/*.ts", "components/**/*.tsx", "lib/**/*.ts"],
 };
 
 export default config;

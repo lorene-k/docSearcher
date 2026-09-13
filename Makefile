@@ -44,6 +44,14 @@ format-backend:
 format-frontend:
 			cd frontend && npm run format
 
+coverage:	coverage-backend coverage-frontend
+
+coverage-backend:
+			cd backend && .venv/bin/pytest tests/ --cov=app --cov-report=term-missing
+
+coverage-frontend:
+			cd frontend && npm test -- --coverage
+
 
 .PHONY: all install install-backend install-frontend dev backend frontend test test-backend test-frontend \
-		lint lint-backend lint-frontend format format-backend format-frontend
+		lint lint-backend lint-frontend format format-backend format-frontend coverage coverage-backend coverage-frontend
