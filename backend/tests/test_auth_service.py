@@ -6,7 +6,7 @@ import pytest
 from fastapi import HTTPException
 from supabase_auth.errors import AuthApiError
 
-from app.services.auth import get_user_from_token, refresh, sign_in, sign_up
+from app.services.auth import confirm_email, get_user_from_token, refresh, sign_in, sign_up
 
 SESSION = SimpleNamespace(access_token="at", refresh_token="rt", expires_in=3600)
 
@@ -54,6 +54,30 @@ class TestSignUp:
                 "expires_in": 3600,
                 "email": "a@b.com",
             }
+
+
+class TestConfirmEmail:
+    def test_valid_link_returns_session_tokens(self):
+        user = SimpleNamespace(email="a@b.com")
+        client = auth_client("verify_otp", return_value=SimpleNamespace(session=SESSION, user=user))
+        with patch("app.services.auth.get_auth_client", return_value=client):
+            assert confirm_email("pkce_abc", "email") == {
+                "access_token": "at",
+                "refresh_token": "rt",
+                "expires_in": 3600,
+                "email": "a@b.com",
+            }
+        client.auth.verify_otp.assert_called_once_with({"token_hash": "pkce_abc", "type": "email"})
+
+    def test_used_or_expired_link_maps_to_400(self):
+        client = auth_client("verify_otp", side_effect=AuthApiError("Token has expired or is invalid", 403, None))
+        with patch("app.services.auth.get_auth_client", return_value=client):
+            assert expect_http_error(confirm_email, "used", "email").status_code == 400
+
+    def test_missing_session_maps_to_400(self):
+        client = auth_client("verify_otp", return_value=SimpleNamespace(session=None, user=None))
+        with patch("app.services.auth.get_auth_client", return_value=client):
+            assert expect_http_error(confirm_email, "abc", "email").status_code == 400
 
 
 class TestSignIn:

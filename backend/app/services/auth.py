@@ -24,6 +24,24 @@ def sign_up(email: str, password: str) -> dict | None:
     }
 
 
+def confirm_email(token_hash: str, otp_type: str) -> dict:
+    invalid_link = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST, detail="Confirmation link is invalid or has expired"
+    )
+    try:
+        res = get_auth_client().auth.verify_otp({"token_hash": token_hash, "type": otp_type})
+    except AuthApiError:
+        raise invalid_link
+    if res.session is None or res.user is None:
+        raise invalid_link
+    return {
+        "access_token": res.session.access_token,
+        "refresh_token": res.session.refresh_token,
+        "expires_in": res.session.expires_in,
+        "email": res.user.email,
+    }
+
+
 def sign_in(email: str, password: str) -> dict:
     try:
         res = get_auth_client().auth.sign_in_with_password({"email": email, "password": password})

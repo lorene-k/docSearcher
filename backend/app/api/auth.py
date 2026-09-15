@@ -1,10 +1,12 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from app.config import settings
 from app.constants import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, REFRESH_TOKEN_MAX_AGE
 from app.middleware.rate_limit import rate_limit
-from app.services.auth import refresh, sign_in, sign_up
+from app.services.auth import confirm_email, refresh, sign_in, sign_up
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -14,6 +16,11 @@ COOKIE_KWARGS = {"httponly": True, "secure": settings.cookie_secure, "samesite":
 class AuthInput(BaseModel):
     email: EmailStr
     password: str
+
+
+class ConfirmInput(BaseModel):
+    token_hash: str = Field(min_length=1, max_length=512)
+    type: Literal["email", "signup"]
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str, access_max_age: int) -> None:
@@ -30,6 +37,13 @@ def register(body: AuthInput, response: Response) -> dict:
             "status": "confirmation_required",
             "message": "Check your email to confirm your account before logging in.",
         }
+    _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
+    return {"email": tokens["email"]}
+
+
+@auth_router.post("/confirm", dependencies=[Depends(rate_limit(10, 60))])
+def confirm(body: ConfirmInput, response: Response) -> dict:
+    tokens = confirm_email(body.token_hash, body.type)
     _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"email": tokens["email"]}
 

@@ -65,6 +65,37 @@ class TestAuthRegister:
         assert r.status_code == 409
 
 
+class TestAuthConfirm:
+    def test_success_logs_the_user_in(self):
+        tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
+        with patch("app.api.auth.confirm_email", return_value=tokens) as confirm_email:
+            r = client.post("/auth/confirm", json={"token_hash": "pkce_abc", "type": "email"})
+        assert r.status_code == 200
+        assert r.json() == {"email": "a@b.com"}
+        assert r.cookies.get("access_token") == "at"
+        assert r.cookies.get("refresh_token") == "rt"
+        confirm_email.assert_called_once_with("pkce_abc", "email")
+
+    def test_invalid_or_expired_link(self):
+        with patch(
+            "app.api.auth.confirm_email",
+            side_effect=HTTPException(status.HTTP_400_BAD_REQUEST, "Confirmation link is invalid or has expired"),
+        ):
+            r = client.post("/auth/confirm", json={"token_hash": "used", "type": "email"})
+        assert r.status_code == 400
+        assert not r.cookies.get("access_token")
+
+    @pytest.mark.parametrize(
+        "body",
+        [{"token_hash": "abc", "type": "recovery"}, {"token_hash": "", "type": "email"}, {"type": "email"}],
+    )
+    def test_rejects_malformed_requests(self, body):
+        with patch("app.api.auth.confirm_email") as confirm_email:
+            r = client.post("/auth/confirm", json=body)
+        assert r.status_code == 422
+        confirm_email.assert_not_called()
+
+
 class TestAuthLogin:
     def test_success(self):
         tokens = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
