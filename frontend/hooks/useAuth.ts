@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/lib/api";
+import { login as apiLogin, register as apiRegister, logout as apiLogout, confirmEmail as apiConfirmEmail } from "@/lib/api";
 
 export type AuthUser = { email: string };
 
@@ -53,6 +53,16 @@ export function useAuth() {
 
     const clearConfirmation = useCallback(() => setConfirmationSent(false), []);
 
+    const confirmEmail = useCallback(async (tokenHash: string, type: string): Promise<boolean> => {
+        try {
+            const { email } = await apiConfirmEmail(tokenHash, type);
+            saveSession(email);
+            return true;
+        } catch {
+            return false;
+        }
+    }, []);
+
     const logout = useCallback(async () => {
         try {
             await apiLogout();
@@ -65,5 +75,5 @@ export function useAuth() {
         }
     }, [router]);
 
-    return { user, loading, error, confirmationSent, login, register, logout, clearConfirmation };
+    return { user, loading, error, confirmationSent, login, register, logout, clearConfirmation, confirmEmail };
 }

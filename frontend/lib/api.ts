@@ -7,7 +7,7 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & { _retried?: boolean 
 
 let refreshPromise: Promise<void> | null = null;
 
-const UNAUTHENTICATED_ENDPOINTS = ["/auth/refresh", "/auth/login", "/auth/register"];
+const UNAUTHENTICATED_ENDPOINTS = ["/auth/refresh", "/auth/login", "/auth/register", "/auth/confirm"];
 
 api.interceptors.response.use(
     (response) => response,
@@ -52,6 +52,11 @@ export const register = async (email: string, password: string): Promise<AuthRes
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
     const { data } = await api.post("/auth/login", { email, password });
+    return data;
+};
+
+export const confirmEmail = async (tokenHash: string, type: string): Promise<AuthResponse> => {
+    const { data } = await api.post("/auth/confirm", { token_hash: tokenHash, type });
     return data;
 };
 

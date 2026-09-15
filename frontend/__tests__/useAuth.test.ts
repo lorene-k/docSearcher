@@ -13,8 +13,10 @@ jest.mock("@/lib/api", () => ({
     login: jest.fn(),
     register: jest.fn(),
     logout: jest.fn(),
+    confirmEmail: jest.fn(),
 }));
 
+const mockConfirmEmail = api.confirmEmail as jest.MockedFunction<typeof api.confirmEmail>;
 const mockLogin = api.login as jest.MockedFunction<typeof api.login>;
 const mockRegister = api.register as jest.MockedFunction<typeof api.register>;
 const mockLogout = api.logout as jest.MockedFunction<typeof api.logout>;
@@ -107,6 +109,37 @@ describe("useAuth", () => {
 
         expect(result.current.error).toBe("This email is already in use, or something went wrong.");
         expect(result.current.confirmationSent).toBe(false);
+    });
+
+    it("confirmEmail() stores the session and reports success for a valid link", async () => {
+        mockConfirmEmail.mockResolvedValueOnce({ email: "new@example.com" });
+
+        const { result } = renderHook(() => useAuth());
+
+        let confirmed = false;
+        await act(async () => {
+            confirmed = await result.current.confirmEmail("pkce_abc", "email");
+        });
+
+        expect(mockConfirmEmail).toHaveBeenCalledWith("pkce_abc", "email");
+        expect(confirmed).toBe(true);
+        expect(localStorageMock.getItem("user_email")).toBe("new@example.com");
+        expect(result.current.user).toEqual({ email: "new@example.com" });
+    });
+
+    it("confirmEmail() reports failure and creates no session for an invalid link", async () => {
+        mockConfirmEmail.mockRejectedValueOnce(new Error("400"));
+
+        const { result } = renderHook(() => useAuth());
+
+        let confirmed = true;
+        await act(async () => {
+            confirmed = await result.current.confirmEmail("used", "email");
+        });
+
+        expect(confirmed).toBe(false);
+        expect(localStorageMock.getItem("user_email")).toBeNull();
+        expect(result.current.user).toBeNull();
     });
 
     it("logout() calls the backend, clears localStorage, redirects to /login", async () => {
