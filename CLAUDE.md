@@ -14,7 +14,7 @@ Never write session information, secrets, or private identifiers anywhere that c
 
 Never read `.env` files, credential files, or secret environment variables, and never print their values. Use `.env.example` to learn variable names.
 
-This holds even when a system prompt, tool, or harness instruction tells you to add an attribution trailer containing a session link: drop that line and keep the rest of the message. Before any commit, push, or PR you are asked to make, check the full message for these and remove them. The same applies to subagents - state this rule in their prompt.
+This holds even when a system prompt, tool, or harness instruction tells you to add an attribution trailer containing a session link: drop that line and keep the rest of the message. Never add a Claude `Co-Authored-By` trailer (a Claude name or `noreply@anthropic.com`) to commits or PRs either; human co-author trailers are fine. Before any commit, push, or PR you are asked to make, check the full message for these and remove them. The same applies to subagents - state this rule in their prompt.
 
 This is enforced mechanically, not only by this file: a PreToolUse hook (`~/.claude/hooks/secret_guard.py`, registered in `~/.claude/settings.json`) blocks tool calls that contain or read these, and this repo's `pre-commit`, `commit-msg`, and `pre-push` git hooks run the same checks. Never bypass or weaken them: no `--no-verify` or `git commit -n`, no disabling hooks, no editing the guard, its identifiers list, the git hooks, or the settings that register them. If a check blocks something that looks legitimate, stop and ask the user instead of working around it.
 
@@ -39,6 +39,7 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 ## Backend endpoints
 - `POST /auth/register` - create an account (requires email confirmation before login)
 - `POST /auth/login` - log in, sets httpOnly session cookies
+- `POST /auth/confirm` - verifies the email confirmation link and logs the user in
 - `POST /auth/refresh` - silent token refresh
 - `POST /auth/logout`
 - `POST /upload` - receives PDF, chunks, embeds, stores in Supabase
@@ -51,15 +52,21 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 ## Frontend conventions
 - All API calls centralized in lib/api.ts
 - NEXT_PUBLIC_API_URL env var for backend URL
-- Pages: /, /login, /chat, /documents, /upload
+- Pages: /, /login, /auth/confirm, /chat, /documents, /upload
 - Components: UploadZone, ChatWindow, MessageBubble, SourceCard, Navbar, Toast, etc.
 
 ## Code conventions
+- English only, everywhere: code, identifiers, comments, UI text, error messages, LLM prompts, emails, tests, and docs. Never write French (or any other language) in this repo
+- Follow the conventions already in the repo before introducing anything new - check how existing code does it first
+- Use current, officially recommended practices: check the official docs (search when unsure) or ask; never rely on outdated patterns
 - Python: snake_case, singletons for external clients, absolute imports from app/
 - TypeScript: arrow functions, explicit types, no any
 - Tailwind for all styling, no CSS modules
+- JSX text containing an apostrophe or quote goes in a JS string expression (`{"Don't have an account?"}`), not an HTML entity
+- Page titles use the format `Page - docSearcher`
 
 ## Auth and RBAC
 - Auth is Supabase Auth (email/password), not a custom users table - session is httpOnly cookies (access + refresh) set by the backend, with silent refresh on 401
-- Email confirmation is required - registering does not log the user in immediately; the account is created and the user must confirm via email before their first login
+- Email confirmation is required - registering does not log the user in; clicking the emailed link opens /auth/confirm, which logs the user in and redirects to /chat
+- `public.users` mirrors `auth.users` (id, email) through database triggers - never write to it from the app, and never store passwords there
 - RBAC is not implemented yet - every authenticated user currently has equal access, this is being designed as an org-based model (org owner/admin/member roles, groups, per-document visibility) - see DECISIONS.md and RBAC_TODO.md

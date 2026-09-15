@@ -117,7 +117,7 @@ Technical decisions for docSearcher, organized by scope
 - Status: this decision is now stale - the project owner confirmed it's a leftover from the pre-auth MVP and must be restructured for RBAC (org-scoped, per-document visibility). Kept here for history; superseded by "RBAC data model" below. Not yet migrated - see TODO.md
 
 ### All timestamp columns use `timestamptz`
-- Context & choice: every existing `created_at` column (`profiles`, `conversations`, `messages`, `documents`) is already `timestamptz`, not naive `timestamp` - verified directly in `backend/supabase/migrations/*.sql`
+- Context & choice: every existing `created_at` column (`users`, `conversations`, `messages`, `documents`) is already `timestamptz`, not naive `timestamp` - verified directly in `backend/supabase/migrations/*.sql`
 - Justification: the project owner asked to confirm this convention while reviewing the schema for RBAC; it's already correctly applied everywhere it exists today
 - Alternatives: none needed - no fix required for existing tables; new tables added for RBAC (orgs, org members, groups, group members, document visibility/ownership fields) must keep following this same convention
 
@@ -140,7 +140,7 @@ Technical decisions for docSearcher, organized by scope
   - A user holds exactly one org role, plus optionally one group-admin designation per group they personally created.
 - Justification: this is the access model the project owner specified directly after the initial audit found no role concept existed anywhere in the codebase (see the answered questions this decision is sourced from)
 - Alternatives: a flatter "everyone in the org sees everything" model (rejected - visibility must be per-document); a `user_roles` join table for multiple roles per user (rejected - one role per user is sufficient, except the narrow group-admin case, which is handled separately from the org role)
-- Status: design decided, not yet implemented - no migration written, `documents`/`profiles` tables unchanged so far. See TODO.md for the implementation plan
+- Status: design decided, not yet implemented - no migration written, `documents`/`users` tables unchanged so far. See TODO.md for the implementation plan
 
 ### Chats stay private per-user regardless of role
 - Context & choice: conversations and messages remain scoped to the owning user only - no role, including org owner, grants access to another user's chat history
@@ -191,7 +191,17 @@ Technical decisions for docSearcher, organized by scope
 - Justification: 16px/1.5 is a standard readable baseline; secondary/metadata text (timestamps, helper captions) intentionally stays smaller
 - Alternatives: only fixing the specific complained-about screens (rejected - the same root cause was present nearly everywhere reading content appears)
 
-### Registration no longer auto-logs the user in
-- Context & choice: `register()` used to save a session and redirect straight to `/chat`, matching `login()`. Now that email confirmation is required (see BACKEND/SECURITY), a successful registration has no session to save - the UI instead shows a "check your email to confirm" state
-- Justification: matches the backend's new confirmation-pending response; redirecting to `/chat` with no valid session would just bounce the user straight back out via `AuthGuard`
-- Alternatives: build a full post-confirmation callback/handoff flow that logs the user in automatically the moment they click the email link (considered - deferred as bigger scope than this fix pass; user logs in manually after confirming for now, see TODO.md)
+### Registration no longer auto-logs the user in; confirming the email does
+- Context & choice: `register()` used to save a session and redirect straight to `/chat`. With email confirmation required there is no session at signup, so the UI shows a "check your email" state. Clicking the email link now opens `/auth/confirm`, which logs the user in and lands them on `/chat` with an "Email confirmed" toast
+- Justification: the previous flow confirmed the email on Supabase's side but never created an app session, so users landed on the login page with no feedback
+- Alternatives: redirect to the login page with a "confirmed, please log in" message (simpler, but an extra step the owner didn't want)
+
+### Email confirmation via token_hash, verified server-side
+- Context & choice: the "Confirm signup" email links to `{SiteURL}/auth/confirm?token_hash=...&type=email` (template in `backend/supabase/templates/confirmation.html`). The page posts the token to `POST /auth/confirm`, which calls Supabase `verify_otp` and sets the same httpOnly session cookies as login
+- Justification: Supabase's documented server-side flow. Tokens never sit in a URL fragment or in browser JavaScript, and it works when the link is opened on a different device or after a backend restart
+- Alternatives: the default PKCE redirect with `?code=` (needs the code verifier stored at signup, which a shared server-side client can't hold per user); implicit flow with tokens in the URL fragment (works, but exposes tokens to the browser and history)
+
+### `public.users` mirrors Supabase Auth, filled by database triggers
+- Context & choice: `public.users` holds `id` (the `auth.users` id, `on delete cascade`), `email`, and `created_at`. A trigger on `auth.users` insert creates the row at signup and a second trigger keeps `email` in sync when it changes. RLS is enabled with a read-own-row policy. Defined in the initial migration, which replaces the earlier unused `profiles` table since no migration had been applied anywhere yet
+- Justification: Supabase's documented pattern for user data. It runs in the same transaction as account creation and gives app tables (and the planned RBAC model) a row to reference from signup onward
+- Alternatives: the previous hand-made `users` table with its own `hashed_password` and random `id` (rejected - Supabase Auth already stores and hashes passwords in `auth.users`, so a second copy only adds leak risk, and the id must match the auth user); inserting from the backend after `sign_up` (not atomic, misses users created outside the API)
