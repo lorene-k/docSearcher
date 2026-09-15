@@ -1,5 +1,5 @@
 -- Tables backing the RAG flow (documents, conversations, messages). User identity
--- comes from Supabase Auth's auth.users — no custom users table.
+-- comes from Supabase Auth's auth.users, mirrored in public.users (initial migration).
 --
 -- The backend talks to Postgres via the service_role key and enforces ownership
 -- itself (verified Supabase sessions + app-level ownership checks), so it
