@@ -34,7 +34,7 @@ class TestGetSections:
 
     def test_high_absent_uses_fallback(self):
         high, _ = get_sections("", "")
-        assert "correspondance directe" in high
+        assert "no direct match" in high
 
     def test_low_absent_returns_empty(self):
         _, low = get_sections("some context", "")
@@ -48,19 +48,19 @@ class TestBuildPrompt:
 
     def test_low_only(self):
         p = build_prompt("What?", [], [LOW])
-        assert "correspondance directe" in p and "Low relevance text." in p
+        assert "no direct match" in p and "Low relevance text." in p
 
     def test_both(self):
         p = build_prompt("What?", [HIGH], [LOW])
         assert "High relevance text." in p and "Low relevance text." in p
 
     def test_none(self):
-        assert "correspondance directe" in build_prompt("What?", [], [])
+        assert "no direct match" in build_prompt("What?", [], [])
 
     def test_history_included(self):
-        history = [{"role": "user", "text": "Bonjour"}, {"role": "assistant", "text": "Salut"}]
-        p = build_prompt("Suite?", [HIGH], [], history=history)
-        assert "Bonjour" in p and "Historique récent" in p
+        history = [{"role": "user", "text": "Hello"}, {"role": "assistant", "text": "Hi"}]
+        p = build_prompt("Follow-up?", [HIGH], [], history=history)
+        assert "Hello" in p and "Recent history" in p
 
 
 class TestHandleRag:
@@ -117,7 +117,7 @@ class TestGetAnswer:
             result = get_answer("query", "user-1")
         generate.assert_not_called()
         assert result["sources"] == []
-        assert "aucune information pertinente" in result["answer"]
+        assert "couldn't find any relevant information" in result["answer"]
 
     def test_sources_carry_high_and_low_relevance(self):
         with (

@@ -16,20 +16,20 @@ def get_context(chunks_high: list[dict], chunks_low: list[dict]) -> tuple[str, s
     context_high = ""
     context_low = ""
     for i, chunk in enumerate(chunks_high):
-        context_high += f"Extrait {i+1} (source: {chunk['filename']}) :\n{chunk['chunk_text']}\n\n"
+        context_high += f"Excerpt {i+1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
     for i, chunk in enumerate(chunks_low):
-        context_low += f"Extrait {i+1} (source: {chunk['filename']}) :\n{chunk['chunk_text']}\n\n"
+        context_low += f"Excerpt {i+1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
     return context_high, context_low
 
 
 def get_sections(context_high: str, context_low: str) -> tuple[str, str]:
     high_section = (
-        f"Extraits pertinents (à privilégier) :\n    {context_high}"
+        f"Relevant excerpts (prefer these):\n    {context_high}"
         if context_high
-        else "Commence le message par dire que tu n'as pas trouvé de correspondance directe mais voici ce qui pourrait être lié\n        "
+        else "Start your answer by saying you found no direct match, but that the following may be related\n        "
     )
     low_section = (
-        f"\n    Extraits moins pertinents (à utiliser sans obligation et avec prudence) :\n    {context_low}\n    "
+        f"\n    Less relevant excerpts (optional, use with caution):\n    {context_low}\n    "
         if context_low
         else ""
     )
@@ -41,9 +41,9 @@ def build_history_section(messages: list[dict]) -> str:
         return ""
     lines = []
     for msg in messages[-HISTORY_WINDOW:]:
-        role_label = "Utilisateur" if msg["role"] == "user" else "Assistant"
-        lines.append(f"{role_label} : {msg['text']}")
-    return "\n    Historique récent :\n    " + "\n    ".join(lines) + "\n"
+        role_label = "User" if msg["role"] == "user" else "Assistant"
+        lines.append(f"{role_label}: {msg['text']}")
+    return "\n    Recent history:\n    " + "\n    ".join(lines) + "\n"
 
 
 def build_prompt(query: str, chunks_high: list[dict], chunks_low: list[dict], history: list[dict] | None = None) -> str:
@@ -51,18 +51,18 @@ def build_prompt(query: str, chunks_high: list[dict], chunks_low: list[dict], hi
     high_section, low_section = get_sections(context_high, context_low)
     history_section = build_history_section(history or [])
 
-    return f"""Tu es un assistant interne. Réponds uniquement à partir des extraits suivants.
-    Règles :
-    - Si la question est trop vague, demande une précision avant de répondre.
-    - Si la réponse n'est pas dans les extraits, dis-le clairement sans inventer.
-    - Cite toujours la source (filename) de l'extrait utilisé.
-    - Réponds en français.
+    return f"""You are an internal assistant. Answer only from the excerpts below.
+    Rules:
+    - If the question is too vague, ask for clarification before answering.
+    - If the answer is not in the excerpts, say so clearly without making anything up.
+    - Always cite the source (filename) of the excerpt you used.
+    - Answer in English.
     {history_section}
     {high_section}
 
     {low_section}
 
-    Question : {query}"""
+    Question: {query}"""
 
 
 def handle_rag(query: str, history: list[dict] | None = None) -> tuple[str | None, list[dict], list[dict]]:
@@ -88,7 +88,7 @@ def get_answer(query: str, user_id: str, conversation_id: str | None = None) -> 
     prompt, chunks_high, chunks_low = handle_rag(query, history)
 
     if prompt is None:
-        answer = "Désolé, je n'ai trouvé aucune information pertinente dans les documents disponibles."
+        answer = "Sorry, I couldn't find any relevant information in the available documents."
         sources: list[dict] = []
     else:
         try:
