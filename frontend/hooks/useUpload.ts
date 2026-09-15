@@ -26,7 +26,7 @@ export function useUpload() {
             setStep("done");
         } catch {
             setStep("error");
-            setErrorMessage("Une erreur est survenue lors de l'import.");
+            setErrorMessage("Something went wrong during the upload.");
         }
     };
 

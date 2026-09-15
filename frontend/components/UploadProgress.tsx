@@ -3,10 +3,10 @@ import type { UploadStep } from "@/hooks/useUpload";
 type Props = { step: UploadStep; progress: number; chunksCreated: number };
 
 const STEPS: { key: UploadStep; label: string }[] = [
-    { key: "uploading", label: "Envoi" },
-    { key: "processing", label: "Traitement" },
-    { key: "indexing", label: "Indexation" },
-    { key: "done", label: "Terminé" },
+    { key: "uploading", label: "Uploading" },
+    { key: "processing", label: "Processing" },
+    { key: "indexing", label: "Indexing" },
+    { key: "done", label: "Done" },
 ];
 const STEP_ORDER: UploadStep[] = ["uploading", "processing", "indexing", "done"];
 
@@ -36,7 +36,7 @@ export default function UploadProgress({ step, progress, chunksCreated }: Props)
                 </div>
             )}
             {step === "done" && (
-                <p className="text-sm text-green-700">Fichier importé · {chunksCreated} fragments indexés.</p>
+                <p className="text-sm text-green-700">File uploaded - {chunksCreated} chunks indexed.</p>
             )}
         </div>
     );

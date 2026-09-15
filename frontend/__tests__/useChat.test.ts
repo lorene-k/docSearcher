@@ -22,20 +22,20 @@ describe("useChat", () => {
 
     it("adds user message and bot reply on success", async () => {
         mockChat.mockResolvedValueOnce({
-            answer: "Voici la réponse.",
+            answer: "Here is the answer.",
             sources: [{ filename: "doc.pdf", chunk_text: "...", relevance: "high" }],
         });
 
         const { result } = renderHook(() => useChat());
 
         await act(async () => {
-            await result.current.sendMessage("Quelle est la politique ?");
+            await result.current.sendMessage("What is the policy?");
         });
 
         expect(result.current.messages).toHaveLength(2);
-        expect(result.current.messages[0]).toEqual({ text: "Quelle est la politique ?", sender: "user" });
+        expect(result.current.messages[0]).toEqual({ text: "What is the policy?", sender: "user" });
         expect(result.current.messages[1].sender).toBe("bot");
-        expect(result.current.messages[1].text).toBe("Voici la réponse.");
+        expect(result.current.messages[1].text).toBe("Here is the answer.");
         expect(result.current.messages[1].sources).toHaveLength(1);
         expect(result.current.loading).toBe(false);
     });
@@ -77,7 +77,7 @@ describe("useChat", () => {
             await result.current.sendMessage("question");
         });
 
-        expect(result.current.error).toBe("Une erreur est survenue. Réessayez.");
+        expect(result.current.error).toBe("Something went wrong. Please try again.");
         expect(result.current.messages).toHaveLength(1); // only user message added
         expect(result.current.loading).toBe(false);
     });

@@ -14,7 +14,7 @@ export function useDocuments() {
         try {
             setDocuments(await getDocuments());
         } catch {
-            setError("Impossible de charger les documents.");
+            setError("Could not load documents.");
         } finally {
             setLoading(false);
         }
@@ -28,7 +28,7 @@ export function useDocuments() {
             await deleteDocument(filename);
         } catch {
             setDocuments((prev) => [...prev, filename]);
-            setError(`Impossible de supprimer "${filename}".`);
+            setError(`Could not delete "${filename}".`);
             throw new Error("delete failed");
         }
     }, []);

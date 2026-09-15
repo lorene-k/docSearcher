@@ -32,7 +32,7 @@ describe("useDocuments", () => {
         mockGetDocuments.mockRejectedValueOnce(new Error("500"));
         const { result } = renderHook(() => useDocuments());
         await waitFor(() => expect(result.current.loading).toBe(false));
-        expect(result.current.error).toBe("Impossible de charger les documents.");
+        expect(result.current.error).toBe("Could not load documents.");
     });
 
     it("removes a document once the backend confirms the delete", async () => {
@@ -60,6 +60,6 @@ describe("useDocuments", () => {
         expect(thrown).toBeInstanceOf(Error);
         expect(result.current.documents).toContain("a.pdf");
         expect(result.current.documents).toHaveLength(2);
-        expect(result.current.error).toBe('Impossible de supprimer "a.pdf".');
+        expect(result.current.error).toBe('Could not delete "a.pdf".');
     });
 });

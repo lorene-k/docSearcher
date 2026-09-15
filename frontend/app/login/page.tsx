@@ -26,16 +26,16 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="card w-full max-w-sm p-8">
                 <h1 className="text-lg font-semibold mb-1 text-gray-900">
-                    {mode === "login" ? "Connexion" : "Créer un compte"}
+                    {mode === "login" ? "Log in" : "Create an account"}
                 </h1>
                 <p className="text-sm text-gray-500 mb-6">docSearcher</p>
                 {mode === "register" && confirmationSent ? (
                     <>
                         <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2 mb-4">
-                            Compte créé - vérifiez votre email pour confirmer avant de vous connecter.
+                            Account created. Check your email to confirm your address before logging in.
                         </p>
                         <button onClick={() => switchMode("login")} className="text-sm underline text-gray-700 hover:text-gray-900">
-                            Retour à la connexion
+                            Back to log in
                         </button>
                     </>
                 ) : (
@@ -49,17 +49,17 @@ export default function LoginPage() {
                                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Mot de passe</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
                                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                             </div>
                             <button type="submit" disabled={loading} className="w-full py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
-                                {loading ? "..." : mode === "login" ? "Se connecter" : "Créer un compte"}
+                                {loading ? "..." : mode === "login" ? "Log in" : "Create account"}
                             </button>
                         </form>
                         <p className="text-xs text-center text-gray-500 mt-4">
-                            {mode === "login" ? "Pas encore de compte ?" : "Déjà un compte ?"}{" "}
+                            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
                             <button onClick={() => switchMode(mode === "login" ? "register" : "login")} className="underline text-gray-700 hover:text-gray-900">
-                                {mode === "login" ? "S'inscrire" : "Se connecter"}
+                                {mode === "login" ? "Sign up" : "Log in"}
                             </button>
                         </p>
                     </>

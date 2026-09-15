@@ -76,7 +76,7 @@ describe("useAuth", () => {
             await result.current.login("bad@example.com", "wrong");
         });
 
-        expect(result.current.error).toBe("Email ou mot de passe invalide.");
+        expect(result.current.error).toBe("Invalid email or password.");
         expect(result.current.user).toBeNull();
         expect(mockPush).not.toHaveBeenCalled();
     });
@@ -105,7 +105,7 @@ describe("useAuth", () => {
             await result.current.register("dupe@example.com", "pass");
         });
 
-        expect(result.current.error).toBe("Cet email est déjà utilisé ou une erreur est survenue.");
+        expect(result.current.error).toBe("This email is already in use, or something went wrong.");
         expect(result.current.confirmationSent).toBe(false);
     });
 

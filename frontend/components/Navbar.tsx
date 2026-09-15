@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const links = [
     { href: "/chat", label: "Chat" },
-    { href: "/upload", label: "Importer" },
+    { href: "/upload", label: "Upload" },
     { href: "/documents", label: "Documents" },
 ];
 
@@ -28,11 +28,11 @@ export default function Navbar() {
                 <li>
                     {user ? (
                         <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-                            Déconnexion
+                            Log out
                         </button>
                     ) : (
                         <Link href="/login" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-                            Connexion
+                            Log in
                         </Link>
                     )}
                 </li>

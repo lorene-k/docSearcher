@@ -51,7 +51,7 @@ export default function ChatWindow({ conversationId, initialMessages = [], onEns
             <div className="flex flex-col gap-4 flex-1 overflow-y-auto p-2">
                 {error && <Banner variant="error" message={error} />}
                 {allMessages.length === 0 && (
-                    <p className="text-sm text-gray-400 text-center mt-10">Posez une question sur vos documents.</p>
+                    <p className="text-sm text-gray-400 text-center mt-10">Ask a question about your documents.</p>
                 )}
                 {allMessages.map((msg, i) => (
                     <MessageBubble key={i} text={msg.text} sender={msg.sender} sources={msg.sources} />
@@ -64,7 +64,7 @@ export default function ChatWindow({ conversationId, initialMessages = [], onEns
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Posez votre question... (Entrée pour envoyer)"
+                    placeholder="Ask your question... (Enter to send)"
                     rows={2}
                     className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm resize-none transition-shadow"
                 />
@@ -73,7 +73,7 @@ export default function ChatWindow({ conversationId, initialMessages = [], onEns
                     disabled={loading || !input.trim()}
                     className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-sm hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 whitespace-nowrap self-stretch"
                 >
-                    {loading ? "..." : "Envoyer"}
+                    {loading ? "..." : "Send"}
                 </button>
             </form>
         </div>

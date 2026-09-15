@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Documents · docSearcher",
+    title: "Documents - docSearcher",
 };
 
 export default function DocumentsLayout({ children }: { children: React.ReactNode }) {

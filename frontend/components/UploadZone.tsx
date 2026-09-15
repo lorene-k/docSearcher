@@ -13,7 +13,7 @@ export default function UploadZone() {
 
     const handleFile = (file: File) => {
         if (file.type !== "application/pdf") {
-            setInvalidTypeMessage("Seuls les fichiers PDF sont acceptés.");
+            setInvalidTypeMessage("Only PDF files are accepted.");
             return;
         }
         setInvalidTypeMessage("");
@@ -39,7 +39,7 @@ export default function UploadZone() {
                 <UploadProgress step={step} progress={progress} chunksCreated={chunksCreated} />
                 {step === "done" && (
                     <button onClick={reset} className="mt-4 text-sm text-gray-500 underline hover:text-gray-700">
-                        Importer un autre fichier
+                        Upload another file
                     </button>
                 )}
             </div>
@@ -56,14 +56,14 @@ export default function UploadZone() {
                 className={`bg-white border-2 border-dashed rounded-lg p-12 text-center cursor-pointer shadow-sm transition-all duration-200 ${isDragging ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-300 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"}`}
             >
                 <p className="text-gray-600 text-sm">
-                    Glissez un fichier PDF ici ou{" "}
-                    <span className="text-gray-900 font-medium underline">parcourez vos fichiers</span>
+                    Drag a PDF file here or{" "}
+                    <span className="text-gray-900 font-medium underline">browse your files</span>
                 </p>
-                <p className="text-gray-400 text-xs mt-1">PDF uniquement · 6 pages max</p>
+                <p className="text-gray-400 text-xs mt-1">PDF only - 6 pages max</p>
                 <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={onChange} />
             </div>
             {step === "error" && (
-                <Banner variant="error" message={errorMessage} action={{ label: "Réessayer", onClick: reset }} />
+                <Banner variant="error" message={errorMessage} action={{ label: "Try again", onClick: reset }} />
             )}
             {invalidTypeMessage && <Banner variant="error" message={invalidTypeMessage} />}
         </div>

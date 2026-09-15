@@ -13,7 +13,7 @@ jest.mock("@/hooks/useUpload", () => ({
     }),
 }));
 
-const INVALID_TYPE_MESSAGE = "Seuls les fichiers PDF sont acceptés.";
+const INVALID_TYPE_MESSAGE = "Only PDF files are accepted.";
 const pdf = new File(["%PDF"], "doc.pdf", { type: "application/pdf" });
 const notPdf = new File(["hello"], "notes.txt", { type: "text/plain" });
 
@@ -36,7 +36,7 @@ describe("UploadZone", () => {
     it("rejects a non-PDF dropped onto the zone", () => {
         render(<UploadZone />);
 
-        fireEvent.drop(screen.getByText(/Glissez un fichier PDF ici/), { dataTransfer: { files: [notPdf] } });
+        fireEvent.drop(screen.getByText(/Drag a PDF file here/), { dataTransfer: { files: [notPdf] } });
 
         expect(mockUpload).not.toHaveBeenCalled();
         expect(screen.queryByText(INVALID_TYPE_MESSAGE)).not.toBeNull();

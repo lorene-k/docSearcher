@@ -31,7 +31,7 @@ export function useAuth() {
             saveSession(email);
             router.push("/chat");
         } catch {
-            setError("Email ou mot de passe invalide.");
+            setError("Invalid email or password.");
         } finally {
             setLoading(false);
         }
@@ -45,7 +45,7 @@ export function useAuth() {
             await apiRegister(email, password);
             setConfirmationSent(true);
         } catch {
-            setError("Cet email est déjà utilisé ou une erreur est survenue.");
+            setError("This email is already in use, or something went wrong.");
         } finally {
             setLoading(false);
         }

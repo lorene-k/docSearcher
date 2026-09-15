@@ -17,7 +17,7 @@ function DocumentsPageInner() {
         setConfirming(null);
         try {
             await remove(filename);
-            setToast({ message: `"${filename}" supprimé.`, variant: "success" });
+            setToast({ message: `"${filename}" deleted.`, variant: "success" });
         } catch {
             // remove() already surfaces the failure via the error banner
         }
@@ -26,14 +26,14 @@ function DocumentsPageInner() {
     return (
         <div className="page-container">
             <h1 className="text-lg font-semibold mb-2">Documents</h1>
-            <p className="text-sm text-gray-500 mb-6">{documents.length} document{documents.length !== 1 ? "s" : ""} dans la base.</p>
+            <p className="text-sm text-gray-500 mb-6">{documents.length} document{documents.length !== 1 ? "s" : ""} in the knowledge base.</p>
 
             {documents.length > 0 && (
                 <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Rechercher un fichier..."
+                    placeholder="Search files..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
             )}
@@ -48,13 +48,13 @@ function DocumentsPageInner() {
 
             {!loading && documents.length === 0 && (
                 <div className="card px-6 py-10 text-center">
-                    <p className="text-sm text-gray-400 mb-2">Aucun document importé.</p>
-                    <a href="/upload" className="text-sm text-blue-600 underline">Importer un document</a>
+                    <p className="text-sm text-gray-400 mb-2">No documents uploaded yet.</p>
+                    <a href="/upload" className="text-sm text-blue-600 underline">Upload a document</a>
                 </div>
             )}
 
             {!loading && documents.length > 0 && filtered.length === 0 && (
-                <p className="text-sm text-gray-400">Aucun résultat pour &ldquo;{search}&rdquo;.</p>
+                <p className="text-sm text-gray-400">{`No results for "${search}".`}</p>
             )}
 
             {!loading && filtered.length > 0 && (
@@ -64,13 +64,13 @@ function DocumentsPageInner() {
                             <span className="text-base text-gray-700 truncate">{name}</span>
                             {confirming === name ? (
                                 <div className="flex items-center gap-2 shrink-0 ml-4">
-                                    <span className="text-xs text-gray-500">Supprimer ?</span>
-                                    <button onClick={() => handleDelete(name)} className="text-xs text-red-600 font-medium hover:underline">Oui</button>
-                                    <button onClick={() => setConfirming(null)} className="text-xs text-gray-500 hover:underline">Non</button>
+                                    <span className="text-xs text-gray-500">Delete?</span>
+                                    <button onClick={() => handleDelete(name)} className="text-xs text-red-600 font-medium hover:underline">Yes</button>
+                                    <button onClick={() => setConfirming(null)} className="text-xs text-gray-500 hover:underline">No</button>
                                 </div>
                             ) : (
                                 <button onClick={() => setConfirming(name)} className="ml-4 text-xs text-gray-400 hover:text-red-500 transition-colors shrink-0">
-                                    Supprimer
+                                    Delete
                                 </button>
                             )}
                         </li>

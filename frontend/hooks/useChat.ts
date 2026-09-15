@@ -23,7 +23,7 @@ export function useChat() {
             const response = await chat(input, conversationId);
             setMessages((prev) => [...prev, { text: response.answer, sender: "bot", sources: response.sources }]);
         } catch {
-            setError("Une erreur est survenue. Réessayez.");
+            setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

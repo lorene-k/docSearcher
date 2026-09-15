@@ -20,7 +20,7 @@ export default function Toast({ message, variant, onDismiss, duration = 3000 }: 
         <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm max-w-xs animate-fade-slide-in ${styles[variant]}`}>
             <div className="flex items-center justify-between gap-4">
                 <span>{message}</span>
-                <button onClick={onDismiss} aria-label="Fermer" className="opacity-70 hover:opacity-100 transition-opacity">✕</button>
+                <button onClick={onDismiss} aria-label="Close" className="opacity-70 hover:opacity-100 transition-opacity">✕</button>
             </div>
         </div>
     );

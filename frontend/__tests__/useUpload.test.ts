@@ -48,7 +48,7 @@ describe("useUpload", () => {
         });
 
         expect(result.current.step).toBe("error");
-        expect(result.current.errorMessage).toBe("Une erreur est survenue lors de l'import.");
+        expect(result.current.errorMessage).toBe("Something went wrong during the upload.");
     });
 
     it("reset returns to a clean idle state", async () => {

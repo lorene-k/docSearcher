@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Importer · docSearcher",
+    title: "Upload - docSearcher",
 };
 
 export default function UploadLayout({ children }: { children: React.ReactNode }) {
