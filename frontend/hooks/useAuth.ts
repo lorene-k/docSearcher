@@ -7,6 +7,8 @@ import {
     register as apiRegister,
     logout as apiLogout,
     confirmEmail as apiConfirmEmail,
+    resendConfirmation as apiResendConfirmation,
+    isEmailNotConfirmedError,
 } from "@/lib/api";
 
 export type AuthUser = { email: string };
@@ -45,17 +47,25 @@ export function useAuth() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [confirmationSent, setConfirmationSent] = useState(false);
+    const [needsConfirmation, setNeedsConfirmation] = useState(false);
+    const [confirmationResent, setConfirmationResent] = useState(false);
 
     const login = useCallback(
         async (email: string, password: string) => {
             setLoading(true);
             setError("");
+            setNeedsConfirmation(false);
             try {
                 await apiLogin(email, password);
                 setSessionEmail(email);
                 router.push("/chat");
-            } catch {
-                setError("Invalid email or password.");
+            } catch (err) {
+                if (isEmailNotConfirmedError(err)) {
+                    setNeedsConfirmation(true);
+                    setError("Confirm your email address before logging in.");
+                } else {
+                    setError("Invalid email or password.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -77,7 +87,24 @@ export function useAuth() {
         }
     }, []);
 
-    const clearConfirmation = useCallback(() => setConfirmationSent(false), []);
+    const clearConfirmation = useCallback(() => {
+        setConfirmationSent(false);
+        setNeedsConfirmation(false);
+        setConfirmationResent(false);
+    }, []);
+
+    const resendConfirmation = useCallback(async (email: string) => {
+        setLoading(true);
+        setError("");
+        try {
+            await apiResendConfirmation(email);
+            setConfirmationResent(true);
+        } catch {
+            setError("Could not send a new link. Try again in a minute.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const confirmEmail = useCallback(async (tokenHash: string, type: string): Promise<boolean> => {
         try {
@@ -100,5 +127,18 @@ export function useAuth() {
         }
     }, [router]);
 
-    return { user, loading, error, confirmationSent, login, register, logout, clearConfirmation, confirmEmail };
+    return {
+        user,
+        loading,
+        error,
+        confirmationSent,
+        needsConfirmation,
+        confirmationResent,
+        login,
+        register,
+        logout,
+        clearConfirmation,
+        confirmEmail,
+        resendConfirmation,
+    };
 }

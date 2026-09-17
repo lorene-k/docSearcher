@@ -12,9 +12,13 @@ jest.mock("@/lib/api", () => ({
     register: jest.fn(),
     logout: jest.fn(),
     confirmEmail: jest.fn(),
+    resendConfirmation: jest.fn(),
+    isEmailNotConfirmedError: jest.fn(),
 }));
 
 const mockConfirmEmail = jest.mocked(api.confirmEmail);
+const mockResendConfirmation = jest.mocked(api.resendConfirmation);
+const mockIsEmailNotConfirmedError = jest.mocked(api.isEmailNotConfirmedError);
 const mockLogin = jest.mocked(api.login);
 const mockRegister = jest.mocked(api.register);
 const mockLogout = jest.mocked(api.logout);
@@ -123,6 +127,45 @@ describe("useAuth", () => {
         expect(confirmed).toBe(false);
         expect(storedEmail()).toBeNull();
         expect(result.current.user).toBeNull();
+    });
+
+    it("login() flags an unconfirmed address instead of blaming the password", async () => {
+        mockLogin.mockRejectedValueOnce(new Error("403"));
+        mockIsEmailNotConfirmedError.mockReturnValueOnce(true);
+        const result = renderAuth();
+
+        await act(async () => {
+            await result.current.login("new@example.com", "password123");
+        });
+
+        expect(result.current.needsConfirmation).toBe(true);
+        expect(result.current.error).toBe("Confirm your email address before logging in.");
+        expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("resendConfirmation() asks the backend for a new link and reports it was sent", async () => {
+        mockResendConfirmation.mockResolvedValueOnce();
+        const result = renderAuth();
+
+        await act(async () => {
+            await result.current.resendConfirmation("new@example.com");
+        });
+
+        expect(mockResendConfirmation).toHaveBeenCalledWith("new@example.com");
+        expect(result.current.confirmationResent).toBe(true);
+        expect(result.current.error).toBe("");
+    });
+
+    it("resendConfirmation() reports a failure without claiming a link was sent", async () => {
+        mockResendConfirmation.mockRejectedValueOnce(new Error("429"));
+        const result = renderAuth();
+
+        await act(async () => {
+            await result.current.resendConfirmation("new@example.com");
+        });
+
+        expect(result.current.confirmationResent).toBe(false);
+        expect(result.current.error).toBe("Could not send a new link. Try again in a minute.");
     });
 
     describe("logout()", () => {

@@ -7,7 +7,7 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & { _retried?: boolean 
 
 let refreshPromise: Promise<void> | null = null;
 
-const UNAUTHENTICATED_ENDPOINTS = ["/auth/refresh", "/auth/login", "/auth/register", "/auth/confirm"];
+const UNAUTHENTICATED_ENDPOINTS = ["/auth/refresh", "/auth/login", "/auth/register", "/auth/confirm", "/auth/resend"];
 
 api.interceptors.response.use(
     (response) => response,
@@ -66,6 +66,14 @@ export const confirmEmail = async (tokenHash: string, type: string): Promise<Aut
     const { data } = await api.post("/auth/confirm", { token_hash: tokenHash, type });
     return data;
 };
+
+export const resendConfirmation = async (email: string): Promise<void> => {
+    await api.post("/auth/resend", { email });
+};
+
+// The backend answers 403 only when the password was right but the address is unconfirmed
+export const isEmailNotConfirmedError = (error: unknown): boolean =>
+    axios.isAxiosError(error) && error.response?.status === 403;
 
 export const refresh = async (): Promise<void> => {
     await api.post("/auth/refresh");
