@@ -48,3 +48,7 @@ alter table public.users enable row level security;
 
 create policy "own user row" on public.users
     for select using (auth.uid() = id);
+
+-- RLS decides which rows a role may see; the grant decides whether it may query the
+-- table at all. Writes are left to the triggers, which run as the table owner.
+grant select on table public.users to service_role, authenticated;

@@ -62,3 +62,10 @@ create policy "own messages" on public.messages
             where c.id = messages.conversation_id and c.user_id = auth.uid()
         )
     );
+
+-- Table privileges are separate from RLS and are not granted by default: without
+-- these, every query fails with "permission denied", service_role included, since
+-- bypassing RLS still requires the underlying grant.
+grant select, insert, update, delete on table public.documents to service_role;
+grant select, insert, update, delete on table public.conversations to service_role, authenticated;
+grant select, insert, update, delete on table public.messages to service_role, authenticated;
