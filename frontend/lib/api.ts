@@ -75,6 +75,13 @@ export const resendConfirmation = async (email: string): Promise<void> => {
 export const isEmailNotConfirmedError = (error: unknown): boolean =>
     axios.isAxiosError(error) && error.response?.status === 403;
 
+// Backends errors carry a stable code in `detail`, which callers turn into a message
+export const errorCode = (error: unknown): string => {
+    if (!axios.isAxiosError(error)) return "";
+    const detail: unknown = error.response?.data?.detail;
+    return typeof detail === "string" ? detail : "";
+};
+
 export const refresh = async (): Promise<void> => {
     await api.post("/auth/refresh");
 };

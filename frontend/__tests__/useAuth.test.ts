@@ -14,7 +14,10 @@ jest.mock("@/lib/api", () => ({
     confirmEmail: jest.fn(),
     resendConfirmation: jest.fn(),
     isEmailNotConfirmedError: jest.fn(),
+    errorCode: jest.fn(),
 }));
+
+const mockErrorCode = jest.mocked(api.errorCode);
 
 const mockConfirmEmail = jest.mocked(api.confirmEmail);
 const mockResendConfirmation = jest.mocked(api.resendConfirmation);
@@ -88,15 +91,24 @@ describe("useAuth", () => {
         expect(result.current.confirmationSent).toBe(true);
     });
 
-    it("register() sets error on failure and does not flag confirmation as sent", async () => {
-        mockRegister.mockRejectedValueOnce(new Error("409"));
+    it.each([
+        ["email_exists", "This email already has an account. Log in instead."],
+        ["weak_password", "Password must be at least 6 characters."],
+        ["email_invalid", "That email address is not valid."],
+        ["rate_limited", "Too many attempts. Wait a minute and try again."],
+        ["signup_disabled", "New accounts are disabled at the moment."],
+        ["registration_failed", "Could not create the account. Try again in a moment."],
+        ["", "Could not create the account. Try again in a moment."],
+    ])("register() reports %s as its own message", async (code, message) => {
+        mockRegister.mockRejectedValueOnce(new Error(code || "network"));
+        mockErrorCode.mockReturnValueOnce(code);
         const result = renderAuth();
 
         await act(async () => {
             await result.current.register("dupe@example.com", "pass");
         });
 
-        expect(result.current.error).toBe("This email is already in use, or something went wrong.");
+        expect(result.current.error).toBe(message);
         expect(result.current.confirmationSent).toBe(false);
     });
 

@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { getDocuments, getConversations, login, register, refresh } from "@/lib/api";
+import { getDocuments, getConversations, login, register, refresh, errorCode } from "@/lib/api";
 
 // lib/api.ts calls axios.create() at import time, before any test-file binding exists,
 // so the created instance is stashed on the mocked module itself.
@@ -116,5 +116,25 @@ describe("api 401 interceptor", () => {
 
         await expect(getDocuments()).rejects.toMatchObject({ response: { status: 500 } });
         expect(calls).toEqual(["GET /documents"]);
+    });
+});
+
+describe("errorCode", () => {
+    it("reads the code the backend puts in detail", async () => {
+        serve({ "POST /auth/register": () => ({ status: 409, data: { detail: "email_exists" } }) });
+
+        const error = await register("a@b.com", "pw").catch((e: unknown) => e);
+        expect(errorCode(error)).toBe("email_exists");
+    });
+
+    it("returns an empty code when the response carries no usable detail", async () => {
+        serve({ "POST /auth/register": () => ({ status: 500, data: { detail: { message: "boom" } } }) });
+
+        const error = await register("a@b.com", "pw").catch((e: unknown) => e);
+        expect(errorCode(error)).toBe("");
+    });
+
+    it("returns an empty code for a plain error", () => {
+        expect(errorCode(new Error("network"))).toBe("");
     });
 });

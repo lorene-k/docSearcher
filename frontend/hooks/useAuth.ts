@@ -9,7 +9,17 @@ import {
     confirmEmail as apiConfirmEmail,
     resendConfirmation as apiResendConfirmation,
     isEmailNotConfirmedError,
+    errorCode,
 } from "@/lib/api";
+
+const REGISTER_ERRORS: Record<string, string> = {
+    email_exists: "This email already has an account. Log in instead.",
+    weak_password: "Password must be at least 6 characters.",
+    email_invalid: "That email address is not valid.",
+    rate_limited: "Too many attempts. Wait a minute and try again.",
+    signup_disabled: "New accounts are disabled at the moment.",
+};
+const REGISTER_FALLBACK = "Could not create the account. Try again in a moment.";
 
 export type AuthUser = { email: string };
 
@@ -80,8 +90,8 @@ export function useAuth() {
         try {
             await apiRegister(email, password);
             setConfirmationSent(true);
-        } catch {
-            setError("This email is already in use, or something went wrong.");
+        } catch (err) {
+            setError(REGISTER_ERRORS[errorCode(err)] ?? REGISTER_FALLBACK);
         } finally {
             setLoading(false);
         }
