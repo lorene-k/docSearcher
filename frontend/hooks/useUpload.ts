@@ -30,7 +30,12 @@ export function useUpload() {
         }
     };
 
-    const reset = () => { setStep("idle"); setProgress(0); setChunksCreated(0); setErrorMessage(""); };
+    const reset = () => {
+        setStep("idle");
+        setProgress(0);
+        setChunksCreated(0);
+        setErrorMessage("");
+    };
 
     return { step, progress, chunksCreated, errorMessage, upload, reset };
 }

@@ -35,13 +35,20 @@ api.interceptors.response.use(
         } finally {
             refreshPromise = null;
         }
-    }
+    },
 );
 
 export type Source = { filename: string; chunk_text: string; relevance?: "high" | "low" };
 export type ChatResponse = { answer: string; sources: Source[] };
 export type Conversation = { id: string; user_id: string; created_at: string };
-export type Message = { id: string; conversation_id: string; role: "user" | "assistant"; text: string; sources: Source[]; created_at: string };
+export type Message = {
+    id: string;
+    conversation_id: string;
+    role: "user" | "assistant";
+    text: string;
+    sources: Source[];
+    created_at: string;
+};
 export type UploadResponse = { message: string; chunks_created: number };
 export type AuthResponse = { email: string };
 

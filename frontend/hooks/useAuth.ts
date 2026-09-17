@@ -2,7 +2,12 @@
 
 import { useState, useCallback, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { login as apiLogin, register as apiRegister, logout as apiLogout, confirmEmail as apiConfirmEmail } from "@/lib/api";
+import {
+    login as apiLogin,
+    register as apiRegister,
+    logout as apiLogout,
+    confirmEmail as apiConfirmEmail,
+} from "@/lib/api";
 
 export type AuthUser = { email: string };
 
@@ -41,19 +46,22 @@ export function useAuth() {
     const [error, setError] = useState("");
     const [confirmationSent, setConfirmationSent] = useState(false);
 
-    const login = useCallback(async (email: string, password: string) => {
-        setLoading(true);
-        setError("");
-        try {
-            await apiLogin(email, password);
-            setSessionEmail(email);
-            router.push("/chat");
-        } catch {
-            setError("Invalid email or password.");
-        } finally {
-            setLoading(false);
-        }
-    }, [router]);
+    const login = useCallback(
+        async (email: string, password: string) => {
+            setLoading(true);
+            setError("");
+            try {
+                await apiLogin(email, password);
+                setSessionEmail(email);
+                router.push("/chat");
+            } catch {
+                setError("Invalid email or password.");
+            } finally {
+                setLoading(false);
+            }
+        },
+        [router],
+    );
 
     const register = useCallback(async (email: string, password: string) => {
         setLoading(true);

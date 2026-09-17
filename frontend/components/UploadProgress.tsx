@@ -21,18 +21,29 @@ export default function UploadProgress({ step, progress, chunksCreated }: Props)
                     const active = idx === currentIndex;
                     return (
                         <div key={key} className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${done ? "bg-green-500 text-white" : active ? "bg-gray-900 text-white" : "bg-gray-200 text-gray-400"}`}>
+                            <div
+                                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-colors ${done ? "bg-green-500 text-white" : active ? "bg-gray-900 text-white" : "bg-gray-200 text-gray-400"}`}
+                            >
                                 {done ? "✓" : i + 1}
                             </div>
-                            <span className={`text-xs ${active ? "text-gray-900 font-medium" : done ? "text-green-600" : "text-gray-400"}`}>{label}</span>
-                            {i < STEPS.length - 1 && <div className={`h-px w-6 ${done ? "bg-green-400" : "bg-gray-200"}`} />}
+                            <span
+                                className={`text-xs ${active ? "font-medium text-gray-900" : done ? "text-green-600" : "text-gray-400"}`}
+                            >
+                                {label}
+                            </span>
+                            {i < STEPS.length - 1 && (
+                                <div className={`h-px w-6 ${done ? "bg-green-400" : "bg-gray-200"}`} />
+                            )}
                         </div>
                     );
                 })}
             </div>
             {step === "uploading" && (
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div className="bg-gray-900 h-1.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="h-1.5 w-full rounded-full bg-gray-200">
+                    <div
+                        className="h-1.5 rounded-full bg-gray-900 transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                    />
                 </div>
             )}
             {step === "done" && (

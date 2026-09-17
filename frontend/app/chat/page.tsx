@@ -8,10 +8,11 @@ import Toast from "@/components/Toast";
 import { useConversations } from "@/hooks/useConversations";
 
 function ChatPageInner() {
-    const { conversations, activeId, historyMessages, loading, selectConversation, newConversation } = useConversations();
+    const { conversations, activeId, historyMessages, loading, selectConversation, newConversation } =
+        useConversations();
     // Only rendered client-side once AuthGuard has confirmed a session, so reading window here is safe.
     const [showConfirmedToast, setShowConfirmedToast] = useState(
-        () => new URLSearchParams(window.location.search).get("email_confirmed") === "1"
+        () => new URLSearchParams(window.location.search).get("email_confirmed") === "1",
     );
     const dismissConfirmedToast = useCallback(() => setShowConfirmedToast(false), []);
 
@@ -20,7 +21,7 @@ function ChatPageInner() {
     }, [showConfirmedToast]);
 
     return (
-        <div className="flex flex-col md:flex-row h-[calc(100vh-57px)] px-4 sm:px-6 py-6 max-w-5xl mx-auto w-full gap-6">
+        <div className="mx-auto flex h-[calc(100vh-57px)] w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 md:flex-row">
             <ConversationSidebar
                 conversations={conversations}
                 activeId={activeId}
@@ -28,8 +29,8 @@ function ChatPageInner() {
                 onSelect={selectConversation}
                 onNew={newConversation}
             />
-            <div className="flex flex-col flex-1 min-h-0">
-                <h1 className="text-lg font-semibold mb-4">Chat</h1>
+            <div className="flex min-h-0 flex-1 flex-col">
+                <h1 className="mb-4 text-lg font-semibold">Chat</h1>
                 <ChatWindow
                     conversationId={activeId ?? undefined}
                     initialMessages={historyMessages}

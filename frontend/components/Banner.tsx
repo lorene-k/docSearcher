@@ -19,13 +19,12 @@ type Props = {
 
 export default function Banner({ variant, message, action }: Props) {
     return (
-        <div className={`flex items-center justify-between text-sm border rounded px-3 py-2 ${styles[variant].wrapper}`}>
+        <div
+            className={`flex items-center justify-between rounded border px-3 py-2 text-sm ${styles[variant].wrapper}`}
+        >
             <span>{message}</span>
             {action && (
-                <button
-                    onClick={action.onClick}
-                    className={`underline text-xs ml-2 ${styles[variant].button}`}
-                >
+                <button onClick={action.onClick} className={`ml-2 text-xs underline ${styles[variant].button}`}>
                     {action.label}
                 </button>
             )}

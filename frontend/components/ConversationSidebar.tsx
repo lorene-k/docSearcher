@@ -12,23 +12,28 @@ type Props = {
 
 export default function ConversationSidebar({ conversations, activeId, loading, onSelect, onNew }: Props) {
     return (
-        <aside className="hidden md:flex md:flex-col w-48 shrink-0 gap-2 border-r border-gray-100 pr-4">
-            <button onClick={onNew} className="w-full text-left px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        <aside className="hidden w-48 shrink-0 gap-2 border-r border-gray-100 pr-4 md:flex md:flex-col">
+            <button
+                onClick={onNew}
+                className="w-full rounded-lg bg-gray-900 px-3 py-2 text-left text-sm text-white transition-colors hover:bg-gray-700"
+            >
                 + New
             </button>
             {loading ? (
-                <div className="flex flex-col gap-2 mt-2">
-                    {[1, 2, 3].map((i) => <div key={i} className="h-9 bg-gray-100 rounded animate-pulse" />)}
+                <div className="mt-2 flex flex-col gap-2">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-9 animate-pulse rounded bg-gray-100" />
+                    ))}
                 </div>
             ) : conversations.length === 0 ? (
-                <p className="text-xs text-gray-400 mt-2 px-1">No conversations yet.</p>
+                <p className="mt-2 px-1 text-xs text-gray-400">No conversations yet.</p>
             ) : (
-                <ul className="flex flex-col gap-1 mt-1">
+                <ul className="mt-1 flex flex-col gap-1">
                     {conversations.map((c) => (
                         <li key={c.id}>
                             <button
                                 onClick={() => onSelect(c.id)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors truncate ${c.id === activeId ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+                                className={`w-full truncate rounded-lg px-3 py-2 text-left text-xs transition-colors ${c.id === activeId ? "bg-blue-50 font-medium text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
                             >
                                 {new Date(c.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short" })}
                             </button>

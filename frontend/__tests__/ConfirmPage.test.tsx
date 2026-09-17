@@ -39,12 +39,14 @@ describe("ConfirmPage", () => {
         render(
             <StrictMode>
                 <ConfirmPage />
-            </StrictMode>
+            </StrictMode>,
         );
 
         expect(screen.queryByText("Confirming your email")).not.toBeNull();
         await waitFor(() =>
-            expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining("navigation") }))
+            expect(consoleError).toHaveBeenCalledWith(
+                expect.objectContaining({ message: expect.stringContaining("navigation") }),
+            ),
         );
         expect(mockConfirmEmail).toHaveBeenCalledTimes(1);
         expect(mockConfirmEmail).toHaveBeenCalledWith("pkce_abc", "email");

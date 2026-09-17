@@ -25,8 +25,10 @@ function DocumentsPageInner() {
 
     return (
         <div className="page-container">
-            <h1 className="text-lg font-semibold mb-2">Documents</h1>
-            <p className="text-sm text-gray-500 mb-6">{documents.length} document{documents.length !== 1 ? "s" : ""} in the knowledge base.</p>
+            <h1 className="mb-2 text-lg font-semibold">Documents</h1>
+            <p className="mb-6 text-sm text-gray-500">
+                {documents.length} document{documents.length !== 1 ? "s" : ""} in the knowledge base.
+            </p>
 
             {documents.length > 0 && (
                 <input
@@ -34,22 +36,28 @@ function DocumentsPageInner() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search files..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
                 />
             )}
 
-            {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-4">{error}</p>}
+            {error && (
+                <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            )}
 
             {loading && (
                 <ul className="flex flex-col gap-2">
-                    {[1, 2, 3].map((i) => <li key={i} className="card px-4 py-3 h-12 bg-gray-100 animate-pulse" />)}
+                    {[1, 2, 3].map((i) => (
+                        <li key={i} className="h-12 animate-pulse card bg-gray-100 px-4 py-3" />
+                    ))}
                 </ul>
             )}
 
             {!loading && documents.length === 0 && (
                 <div className="card px-6 py-10 text-center">
-                    <p className="text-sm text-gray-400 mb-2">No documents uploaded yet.</p>
-                    <a href="/upload" className="text-sm text-blue-600 underline">Upload a document</a>
+                    <p className="mb-2 text-sm text-gray-400">No documents uploaded yet.</p>
+                    <a href="/upload" className="text-sm text-blue-600 underline">
+                        Upload a document
+                    </a>
                 </div>
             )}
 
@@ -60,16 +68,29 @@ function DocumentsPageInner() {
             {!loading && filtered.length > 0 && (
                 <ul className="flex flex-col gap-2">
                     {filtered.map((name) => (
-                        <li key={name} className="card px-4 py-3 flex items-center justify-between">
-                            <span className="text-base text-gray-700 truncate">{name}</span>
+                        <li key={name} className="flex items-center justify-between card px-4 py-3">
+                            <span className="truncate text-base text-gray-700">{name}</span>
                             {confirming === name ? (
-                                <div className="flex items-center gap-2 shrink-0 ml-4">
+                                <div className="ml-4 flex shrink-0 items-center gap-2">
                                     <span className="text-xs text-gray-500">Delete?</span>
-                                    <button onClick={() => handleDelete(name)} className="text-xs text-red-600 font-medium hover:underline">Yes</button>
-                                    <button onClick={() => setConfirming(null)} className="text-xs text-gray-500 hover:underline">No</button>
+                                    <button
+                                        onClick={() => handleDelete(name)}
+                                        className="text-xs font-medium text-red-600 hover:underline"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button
+                                        onClick={() => setConfirming(null)}
+                                        className="text-xs text-gray-500 hover:underline"
+                                    >
+                                        No
+                                    </button>
                                 </div>
                             ) : (
-                                <button onClick={() => setConfirming(name)} className="ml-4 text-xs text-gray-400 hover:text-red-500 transition-colors shrink-0">
+                                <button
+                                    onClick={() => setConfirming(name)}
+                                    className="ml-4 shrink-0 text-xs text-gray-400 transition-colors hover:text-red-500"
+                                >
                                     Delete
                                 </button>
                             )}
@@ -84,5 +105,9 @@ function DocumentsPageInner() {
 }
 
 export default function DocumentsPage() {
-    return <AuthGuard><DocumentsPageInner /></AuthGuard>;
+    return (
+        <AuthGuard>
+            <DocumentsPageInner />
+        </AuthGuard>
+    );
 }

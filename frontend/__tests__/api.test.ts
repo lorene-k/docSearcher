@@ -39,7 +39,10 @@ const serve = (routes: Record<string, Handler>) => {
     };
 };
 
-const expired = (okData: unknown): Handler => (_config, attempt) => (attempt === 1 ? { status: 401 } : { status: 200, data: okData });
+const expired =
+    (okData: unknown): Handler =>
+    (_config, attempt) =>
+        attempt === 1 ? { status: 401 } : { status: 200, data: okData };
 
 describe("api 401 interceptor", () => {
     beforeEach(() => {
@@ -103,7 +106,9 @@ describe("api 401 interceptor", () => {
 
         await expect(getDocuments()).rejects.toBeDefined();
         expect(localStorage.getItem("user_email")).toBeNull();
-        expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining("navigation") }));
+        expect(consoleError).toHaveBeenCalledWith(
+            expect.objectContaining({ message: expect.stringContaining("navigation") }),
+        );
     });
 
     it("passes non-401 errors straight through without refreshing", async () => {

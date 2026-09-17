@@ -15,23 +15,31 @@ export default function Navbar() {
     const { user, logout } = useAuth();
 
     return (
-        <nav className="bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="font-semibold text-gray-900">docSearcher</Link>
-            <ul className="flex gap-6 items-center">
+        <nav className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
+            <Link href="/" className="font-semibold text-gray-900">
+                docSearcher
+            </Link>
+            <ul className="flex items-center gap-6">
                 {links.map(({ href, label }) => (
                     <li key={href}>
-                        <Link href={href} className={`text-sm transition-colors ${pathname === href ? "text-blue-600 border-b-2 border-blue-600 pb-0.5" : "text-gray-500 hover:text-gray-900"}`}>
+                        <Link
+                            href={href}
+                            className={`text-sm transition-colors ${pathname === href ? "border-b-2 border-blue-600 pb-0.5 text-blue-600" : "text-gray-500 hover:text-gray-900"}`}
+                        >
                             {label}
                         </Link>
                     </li>
                 ))}
                 <li>
                     {user ? (
-                        <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                        <button
+                            onClick={logout}
+                            className="text-sm text-gray-400 transition-colors hover:text-gray-700"
+                        >
                             Log out
                         </button>
                     ) : (
-                        <Link href="/login" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+                        <Link href="/login" className="text-sm text-gray-400 transition-colors hover:text-gray-700">
                             Log in
                         </Link>
                     )}

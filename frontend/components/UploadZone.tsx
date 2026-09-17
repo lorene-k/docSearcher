@@ -50,16 +50,19 @@ export default function UploadZone() {
         <div className="flex flex-col gap-4">
             <div
                 onClick={() => inputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={onDrop}
-                className={`bg-white border-2 border-dashed rounded-lg p-12 text-center cursor-pointer shadow-sm transition-all duration-200 ${isDragging ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-300 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"}`}
+                className={`cursor-pointer rounded-lg border-2 border-dashed bg-white p-12 text-center shadow-sm transition-all duration-200 ${isDragging ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-300 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"}`}
             >
-                <p className="text-gray-600 text-sm">
+                <p className="text-sm text-gray-600">
                     Drag a PDF file here or{" "}
-                    <span className="text-gray-900 font-medium underline">browse your files</span>
+                    <span className="font-medium text-gray-900 underline">browse your files</span>
                 </p>
-                <p className="text-gray-400 text-xs mt-1">PDF only - 6 pages max</p>
+                <p className="mt-1 text-xs text-gray-400">PDF only - 6 pages max</p>
                 <input ref={inputRef} type="file" accept=".pdf" className="hidden" onChange={onChange} />
             </div>
             {step === "error" && (
