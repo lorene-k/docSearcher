@@ -1,6 +1,6 @@
-from supabase import create_client, Client
 from app.config import settings
-from app.constants import SIMILARITY_LOW, MATCH_CANDIDATES
+from app.constants import MATCH_CANDIDATES, SIMILARITY_LOW
+from supabase import Client, create_client
 
 _client: Client | None = None
 _auth_client: Client | None = None
@@ -27,6 +27,7 @@ def get_auth_client() -> Client:
 
 
 # ── documents ─────────────────────────────────────────────────────────────────
+
 
 def insert_chunks(filename: str, chunks: list[dict]) -> None:
     client = get_client()
@@ -56,6 +57,7 @@ def delete_document(filename: str) -> bool:
 
 # ── conversations ──────────────────────────────────────────────────────────────
 
+
 def create_conversation(user_id: str) -> dict:
     client = get_client()
     result = client.table("conversations").insert({"user_id": user_id}).execute()
@@ -70,17 +72,12 @@ def get_conversation(conversation_id: str) -> dict | None:
 
 def get_conversations(user_id: str) -> list[dict]:
     client = get_client()
-    result = (
-        client.table("conversations")
-        .select("*")
-        .eq("user_id", user_id)
-        .order("created_at", desc=True)
-        .execute()
-    )
+    result = client.table("conversations").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
     return result.data
 
 
 # ── messages ───────────────────────────────────────────────────────────────────
+
 
 def get_messages(conversation_id: str) -> list[dict]:
     client = get_client()

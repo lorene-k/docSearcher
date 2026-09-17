@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from threading import Lock
-from typing import Callable
 
 from fastapi import HTTPException, Request, status
 

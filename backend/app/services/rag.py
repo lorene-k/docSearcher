@@ -2,10 +2,10 @@ import logging
 
 from fastapi import HTTPException, status
 
-from app.services.embedding import embed_query
-from app.db.supabase import get_conversation, search_similar_chunks, get_messages, insert_message
-from app.services.llm import generate_with_fallback
 from app.constants import SIMILARITY_HIGH, SIMILARITY_LOW
+from app.db.supabase import get_conversation, get_messages, insert_message, search_similar_chunks
+from app.services.embedding import embed_query
+from app.services.llm import generate_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,9 @@ def get_context(chunks_high: list[dict], chunks_low: list[dict]) -> tuple[str, s
     context_high = ""
     context_low = ""
     for i, chunk in enumerate(chunks_high):
-        context_high += f"Excerpt {i+1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
+        context_high += f"Excerpt {i + 1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
     for i, chunk in enumerate(chunks_low):
-        context_low += f"Excerpt {i+1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
+        context_low += f"Excerpt {i + 1} (source: {chunk['filename']}):\n{chunk['chunk_text']}\n\n"
     return context_high, context_low
 
 
@@ -29,9 +29,7 @@ def get_sections(context_high: str, context_low: str) -> tuple[str, str]:
         else "Start your answer by saying you found no direct match, but that the following may be related\n        "
     )
     low_section = (
-        f"\n    Less relevant excerpts (optional, use with caution):\n    {context_low}\n    "
-        if context_low
-        else ""
+        f"\n    Less relevant excerpts (optional, use with caution):\n    {context_low}\n    " if context_low else ""
     )
     return high_section, low_section
 
@@ -100,12 +98,8 @@ def get_answer(query: str, user_id: str, conversation_id: str | None = None) -> 
                 detail="The assistant is temporarily unavailable. Please try again shortly.",
             ) from exc
         sources = [
-            {"filename": c["filename"], "chunk_text": c["chunk_text"], "relevance": "high"}
-            for c in chunks_high
-        ] + [
-            {"filename": c["filename"], "chunk_text": c["chunk_text"], "relevance": "low"}
-            for c in chunks_low
-        ]
+            {"filename": c["filename"], "chunk_text": c["chunk_text"], "relevance": "high"} for c in chunks_high
+        ] + [{"filename": c["filename"], "chunk_text": c["chunk_text"], "relevance": "low"} for c in chunks_low]
 
     if conversation_id:
         insert_message(conversation_id, "user", query)

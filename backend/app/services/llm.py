@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 class LLMProvider(ABC):
     @abstractmethod
-    def generate(self, prompt: str) -> str:
-        ...
+    def generate(self, prompt: str) -> str: ...
 
 
 class GeminiProvider(LLMProvider):
     def generate(self, prompt: str) -> str:
         from app.services.google_client import get_client
+
         client = get_client()
         response = client.models.generate_content(
             model=GENERATION_MODEL,
@@ -36,6 +36,7 @@ class GroqProvider(LLMProvider):
     def _get_client(self):
         if self.__class__._client is None:
             from groq import Groq
+
             self.__class__._client = Groq(api_key=settings.groq_api_key)
         return self.__class__._client
 

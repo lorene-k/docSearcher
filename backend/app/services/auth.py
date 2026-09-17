@@ -1,5 +1,5 @@
-from supabase_auth.errors import AuthApiError
 from fastapi import HTTPException, status
+from supabase_auth.errors import AuthApiError
 
 from app.db.supabase import get_auth_client
 

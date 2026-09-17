@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, UploadFile, APIRouter, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from starlette.concurrency import run_in_threadpool
 
 from app.db.supabase import get_filenames, insert_chunks

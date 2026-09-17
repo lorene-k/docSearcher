@@ -1,7 +1,9 @@
 import io
+
 from fastapi import HTTPException, status
 from pypdf import PdfReader
-from app.constants import CHUNK_SIZE, CHUNK_OVERLAP, MAX_PDF_PAGES
+
+from app.constants import CHUNK_OVERLAP, CHUNK_SIZE, MAX_PDF_PAGES
 
 
 def extract_text(file_bytes: bytes) -> str:
