@@ -60,7 +60,7 @@ def generate_with_fallback(prompt: str) -> str:
     for provider in providers:
         try:
             return provider.generate(prompt)
-        except Exception as exc:
+        except Exception as exc: # noqa: BLE001 (provider fallback loop, must catch anything)
             logger.warning("LLM provider %s failed: %s", type(provider).__name__, exc)
             last_exc = exc
 
