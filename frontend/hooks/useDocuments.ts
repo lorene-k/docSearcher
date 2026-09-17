@@ -8,19 +8,23 @@ export function useDocuments() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchDocuments = useCallback(async () => {
-        setLoading(true);
-        setError("");
-        try {
-            setDocuments(await getDocuments());
-        } catch {
-            setError("Could not load documents.");
-        } finally {
-            setLoading(false);
-        }
+    useEffect(() => {
+        // Ignores the response if the component unmounted before the request settled
+        let ignore = false;
+        getDocuments()
+            .then((docs) => {
+                if (!ignore) setDocuments(docs);
+            })
+            .catch(() => {
+                if (!ignore) setError("Could not load documents.");
+            })
+            .finally(() => {
+                if (!ignore) setLoading(false);
+            });
+        return () => {
+            ignore = true;
+        };
     }, []);
-
-    useEffect(() => { fetchDocuments(); }, [fetchDocuments]);
 
     const remove = useCallback(async (filename: string) => {
         setDocuments((prev) => prev.filter((d) => d !== filename));
@@ -33,5 +37,5 @@ export function useDocuments() {
         }
     }, []);
 
-    return { documents, loading, error, remove, refetch: fetchDocuments };
+    return { documents, loading, error, remove };
 }

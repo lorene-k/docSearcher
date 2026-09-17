@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSessionEmail } from "@/hooks/useAuth";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const [checked, setChecked] = useState(false);
+    const email = useSessionEmail();
 
     useEffect(() => {
-        const email = localStorage.getItem("user_email");
-        if (!email) {
-            router.replace("/login");
-        } else {
-            setChecked(true);
-        }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        if (email === null) router.replace("/login");
+    }, [email, router]);
 
-    if (!checked) return null;
+    if (!email) return null;
     return <>{children}</>;
 }
