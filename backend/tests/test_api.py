@@ -125,6 +125,34 @@ class TestAuthLogin:
             r = login(password="wrong")
         assert r.status_code == 401
 
+    def test_unconfirmed_email_is_told_apart_from_bad_credentials(self):
+        error = HTTPException(status.HTTP_403_FORBIDDEN, "Email not confirmed")
+        with patch("app.api.auth.sign_in", side_effect=error):
+            r = login()
+        assert r.status_code == 403
+        assert not r.cookies.get("access_token")
+
+
+class TestAuthResend:
+    def test_accepts_and_asks_the_service_for_a_new_link(self):
+        with patch("app.api.auth.resend_confirmation") as resend_confirmation:
+            r = client.post("/auth/resend", json={"email": "a@b.com"})
+        assert r.status_code == 202
+        resend_confirmation.assert_called_once_with("a@b.com")
+
+    def test_unknown_address_gets_the_same_answer(self):
+        with patch("app.api.auth.resend_confirmation"):
+            known = client.post("/auth/resend", json={"email": "a@b.com"})
+            unknown = client.post("/auth/resend", json={"email": "nobody@b.com"})
+        assert known.status_code == unknown.status_code
+        assert known.json() == unknown.json()
+
+    def test_rejects_a_malformed_address(self):
+        with patch("app.api.auth.resend_confirmation") as resend_confirmation:
+            r = client.post("/auth/resend", json={"email": "not-an-email"})
+        assert r.status_code == 422
+        resend_confirmation.assert_not_called()
+
 
 class TestAuthRefresh:
     def test_no_cookie_returns_401(self):

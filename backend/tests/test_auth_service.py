@@ -7,7 +7,14 @@ import pytest
 from fastapi import HTTPException
 from supabase_auth.errors import AuthApiError
 
-from app.services.auth import confirm_email, get_user_from_token, refresh, sign_in, sign_up
+from app.services.auth import (
+    confirm_email,
+    get_user_from_token,
+    refresh,
+    resend_confirmation,
+    sign_in,
+    sign_up,
+)
 
 SESSION = SimpleNamespace(access_token="at", refresh_token="rt", expires_in=3600)
 EXPECTED_TOKENS = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600, "email": "a@b.com"}
@@ -69,6 +76,20 @@ class TestSignIn:
     def test_auth_error_maps_to_401(self, auth_client):
         auth_client.sign_in_with_password.side_effect = AuthApiError("Invalid login credentials", 400, None)
         assert expect_http_error(sign_in, "a@b.com", "wrong").status_code == 401
+
+    def test_unconfirmed_email_maps_to_403(self, auth_client):
+        auth_client.sign_in_with_password.side_effect = AuthApiError("Email not confirmed", 400, "email_not_confirmed")
+        assert expect_http_error(sign_in, "a@b.com", "right").status_code == 403
+
+
+class TestResendConfirmation:
+    def test_asks_supabase_for_a_new_signup_email(self, auth_client):
+        resend_confirmation("a@b.com")
+        auth_client.resend.assert_called_once_with({"type": "signup", "email": "a@b.com"})
+
+    def test_swallows_auth_errors_so_callers_learn_nothing(self, auth_client):
+        auth_client.resend.side_effect = AuthApiError("over_email_send_rate_limit", 429, None)
+        assert resend_confirmation("a@b.com") is None
 
 
 class TestRefresh:

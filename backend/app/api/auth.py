@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 from app.config import settings
 from app.constants import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, REFRESH_TOKEN_MAX_AGE
 from app.middleware.rate_limit import rate_limit
-from app.services.auth import confirm_email, refresh, sign_in, sign_up
+from app.services.auth import confirm_email, refresh, resend_confirmation, sign_in, sign_up
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -21,6 +21,10 @@ class AuthInput(BaseModel):
 class ConfirmInput(BaseModel):
     token_hash: str = Field(min_length=1, max_length=512)
     type: Literal["email", "signup"]
+
+
+class ResendInput(BaseModel):
+    email: EmailStr
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str, access_max_age: int) -> None:
@@ -46,6 +50,16 @@ def confirm(body: ConfirmInput, response: Response) -> dict:
     tokens = confirm_email(body.token_hash, body.type)
     _set_auth_cookies(response, tokens["access_token"], tokens["refresh_token"], tokens["expires_in"])
     return {"email": tokens["email"]}
+
+
+@auth_router.post("/resend", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(rate_limit(3, 60))])
+def resend(body: ResendInput) -> dict:
+    # Always accepted, so the response never says whether the address has an account.
+    resend_confirmation(body.email)
+    return {
+        "status": "confirmation_sent",
+        "message": "If that address needs confirming, a new link is on its way.",
+    }
 
 
 @auth_router.post("/login", dependencies=[Depends(rate_limit(10, 60))])

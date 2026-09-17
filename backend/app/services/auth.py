@@ -3,6 +3,8 @@ from supabase_auth.errors import AuthApiError
 
 from app.db.supabase import get_auth_client
 
+EMAIL_NOT_CONFIRMED = "email_not_confirmed"
+
 
 def sign_up(email: str, password: str) -> dict | None:
     try:
@@ -42,10 +44,22 @@ def confirm_email(token_hash: str, otp_type: str) -> dict:
     }
 
 
+def resend_confirmation(email: str) -> None:
+    """Best effort: a caller must not learn whether the address has an unconfirmed account."""
+    try:
+        get_auth_client().auth.resend({"type": "signup", "email": email})
+    except AuthApiError:
+        pass
+
+
 def sign_in(email: str, password: str) -> dict:
     try:
         res = get_auth_client().auth.sign_in_with_password({"email": email, "password": password})
-    except AuthApiError:
+    except AuthApiError as e:
+        # Told apart from bad credentials so the UI can offer a new confirmation link.
+        # Only reachable with a correct password, so it reveals nothing to a stranger.
+        if e.code == EMAIL_NOT_CONFIRMED:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email not confirmed")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return {
         "access_token": res.session.access_token,
