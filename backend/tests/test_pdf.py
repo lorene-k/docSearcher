@@ -1,21 +1,32 @@
 """Tests for PDF extraction and chunking."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
 
+from app.constants import CHUNK_OVERLAP, CHUNK_SIZE, MAX_PDF_PAGES
 from app.services.pdf import create_chunks, extract_text, process_pdf
-from app.constants import CHUNK_SIZE, CHUNK_OVERLAP, MAX_PDF_PAGES
+
+
+def fake_reader(page_texts):
+    """Patch PdfReader with a reader whose pages return the given texts."""
+    pages = []
+    for text in page_texts:
+        page = MagicMock()
+        page.extract_text.return_value = text
+        pages.append(page)
+    return patch("app.services.pdf.PdfReader", return_value=MagicMock(pages=pages))
 
 
 class TestCreateChunks:
-    def test_empty_text_returns_empty_list(self):
-        assert create_chunks("") == []
-
-    def test_short_text_single_chunk(self):
-        chunks = create_chunks("hello world")
-        assert len(chunks) == 1
-        assert chunks[0] == "hello world"
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("", []), ("hello", ["hello"]), ("hello world", ["hello world"])],
+        ids=["empty_text", "single_word", "short_text"],
+    )
+    def test_small_inputs(self, text, expected):
+        assert create_chunks(text) == expected
 
     def test_chunk_size_respected(self):
         text = " ".join(["word"] * 600)
@@ -28,61 +39,35 @@ class TestCreateChunks:
         assert len(chunks) >= 2
         assert chunks[0].split()[-CHUNK_OVERLAP:] == chunks[1].split()[:CHUNK_OVERLAP]
 
-    def test_single_word(self):
-        assert create_chunks("hello") == ["hello"]
-
     def test_exact_chunk_size_produces_overlap_chunk(self):
-        # CHUNK_SIZE words → 2 chunks: full chunk + overlap tail
-        text = " ".join(["x"] * CHUNK_SIZE)
-        chunks = create_chunks(text)
+        # A text of exactly CHUNK_SIZE words yields a full chunk plus a tail made of the overlap
+        chunks = create_chunks(" ".join(["x"] * CHUNK_SIZE))
         assert len(chunks) == 2
         assert len(chunks[0].split()) == CHUNK_SIZE
         assert len(chunks[1].split()) == CHUNK_OVERLAP
 
 
 class TestExtractText:
-    def test_empty_page_returns_empty_string(self):
-        mock_page = MagicMock()
-        mock_page.extract_text.return_value = None
-        mock_reader = MagicMock()
-        mock_reader.pages = [mock_page]
-        with patch("app.services.pdf.PdfReader", return_value=mock_reader):
-            assert extract_text(b"fake") == ""
-
-    def test_single_page_text(self):
-        mock_page = MagicMock()
-        mock_page.extract_text.return_value = "Hello PDF"
-        mock_reader = MagicMock()
-        mock_reader.pages = [mock_page]
-        with patch("app.services.pdf.PdfReader", return_value=mock_reader):
-            assert extract_text(b"fake") == "Hello PDF"
-
-    def test_multi_page_concatenation(self):
-        pages = []
-        for text in ["Page one. ", "Page two. ", "Page three."]:
-            p = MagicMock()
-            p.extract_text.return_value = text
-            pages.append(p)
-        mock_reader = MagicMock()
-        mock_reader.pages = pages
-        with patch("app.services.pdf.PdfReader", return_value=mock_reader):
-            assert extract_text(b"fake") == "Page one. Page two. Page three."
+    @pytest.mark.parametrize(
+        ("page_texts", "expected"),
+        [
+            ([None], ""),
+            (["Hello PDF"], "Hello PDF"),
+            (["Page one. ", "Page two. ", "Page three."], "Page one. Page two. Page three."),
+        ],
+        ids=["empty_page", "single_page", "multi_page_concatenation"],
+    )
+    def test_extracts_page_text(self, page_texts, expected):
+        with fake_reader(page_texts):
+            assert extract_text(b"fake") == expected
 
     def test_exceeds_page_limit_raises(self):
-        mock_reader = MagicMock()
-        mock_reader.pages = [MagicMock() for _ in range(MAX_PDF_PAGES + 1)]
-        with patch("app.services.pdf.PdfReader", return_value=mock_reader):
-            with pytest.raises(HTTPException) as exc_info:
-                extract_text(b"fake")
+        with fake_reader(["x"] * (MAX_PDF_PAGES + 1)), pytest.raises(HTTPException) as exc_info:
+            extract_text(b"fake")
         assert exc_info.value.status_code == 413
 
     def test_at_page_limit_succeeds(self):
-        pages = [MagicMock() for _ in range(MAX_PDF_PAGES)]
-        for p in pages:
-            p.extract_text.return_value = "x"
-        mock_reader = MagicMock()
-        mock_reader.pages = pages
-        with patch("app.services.pdf.PdfReader", return_value=mock_reader):
+        with fake_reader(["x"] * MAX_PDF_PAGES):
             assert extract_text(b"fake") == "x" * MAX_PDF_PAGES
 
 
@@ -95,7 +80,6 @@ class TestProcessPdf:
             assert process_pdf(b"fake") == ["one two", "two three"]
 
     def test_empty_pdf_raises(self):
-        with patch("app.services.pdf.extract_text", return_value=""):
-            with pytest.raises(HTTPException) as exc_info:
-                process_pdf(b"fake")
+        with patch("app.services.pdf.extract_text", return_value=""), pytest.raises(HTTPException) as exc_info:
+            process_pdf(b"fake")
         assert exc_info.value.status_code == 400
