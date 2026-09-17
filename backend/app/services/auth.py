@@ -6,13 +6,31 @@ from app.db.supabase import get_auth_client
 EMAIL_NOT_CONFIRMED = "email_not_confirmed"
 
 
+# Supabase error code -> (HTTP status, detail the frontend turns into a message).
+# The detail is a stable code, not prose, so the wording lives with the UI.
+SIGN_UP_ERRORS = {
+    "user_already_exists": (status.HTTP_409_CONFLICT, "email_exists"),
+    "email_exists": (status.HTTP_409_CONFLICT, "email_exists"),
+    "weak_password": (status.HTTP_400_BAD_REQUEST, "weak_password"),
+    "email_address_invalid": (status.HTTP_400_BAD_REQUEST, "email_invalid"),
+    "over_email_send_rate_limit": (status.HTTP_429_TOO_MANY_REQUESTS, "rate_limited"),
+    "over_request_rate_limit": (status.HTTP_429_TOO_MANY_REQUESTS, "rate_limited"),
+    "signup_disabled": (status.HTTP_403_FORBIDDEN, "signup_disabled"),
+    "email_provider_disabled": (status.HTTP_403_FORBIDDEN, "signup_disabled"),
+}
+
+
 def sign_up(email: str, password: str) -> dict | None:
     try:
         res = get_auth_client().auth.sign_up({"email": email, "password": password})
     except AuthApiError as e:
-        if e.status == 422 or "already registered" in str(e).lower():
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed")
+        if e.code in SIGN_UP_ERRORS:
+            code, detail = SIGN_UP_ERRORS[e.code]
+            raise HTTPException(status_code=code, detail=detail)
+        # Older Auth versions answered without an error code.
+        if "already registered" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email_exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="registration_failed")
 
     if res.session is None:
         # Email confirmation is enabled for this project: the account was created

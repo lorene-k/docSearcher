@@ -36,17 +36,32 @@ def expect_http_error(fn, *args) -> HTTPException:
 
 class TestSignUp:
     @pytest.mark.parametrize(
-        ("error", "expected_status"),
+        ("error", "expected_status", "expected_detail"),
         [
-            (AuthApiError("exists", 422, None), 409),
-            (AuthApiError("User already registered", 400, None), 409),
-            (AuthApiError("weak password", 400, None), 400),
+            (AuthApiError("exists", 422, "user_already_exists"), 409, "email_exists"),
+            (AuthApiError("exists", 422, "email_exists"), 409, "email_exists"),
+            (AuthApiError("too short", 422, "weak_password"), 400, "weak_password"),
+            (AuthApiError("bad address", 400, "email_address_invalid"), 400, "email_invalid"),
+            (AuthApiError("slow down", 429, "over_email_send_rate_limit"), 429, "rate_limited"),
+            (AuthApiError("closed", 422, "signup_disabled"), 403, "signup_disabled"),
+            (AuthApiError("User already registered", 400, None), 409, "email_exists"),
+            (AuthApiError("boom", 500, None), 400, "registration_failed"),
         ],
-        ids=["already_registered_status", "already_registered_message", "other_auth_error"],
+        ids=[
+            "user_already_exists",
+            "email_exists",
+            "weak_password",
+            "email_invalid",
+            "rate_limited",
+            "signup_disabled",
+            "already_registered_message_without_code",
+            "unknown_error",
+        ],
     )
-    def test_auth_error_mapping(self, auth_client, error, expected_status):
+    def test_auth_error_mapping(self, auth_client, error, expected_status, expected_detail):
         auth_client.sign_up.side_effect = error
-        assert expect_http_error(sign_up, "a@b.com", "pw").status_code == expected_status
+        raised = expect_http_error(sign_up, "a@b.com", "pw")
+        assert (raised.status_code, raised.detail) == (expected_status, expected_detail)
 
     def test_confirmation_pending_returns_none(self, auth_client):
         auth_client.sign_up.return_value = SimpleNamespace(session=None)
