@@ -10,7 +10,14 @@ from app.services.auth import confirm_email, refresh, resend_confirmation, sign_
 
 auth_router = APIRouter(prefix="/auth")
 
-COOKIE_KWARGS = {"httponly": True, "secure": settings.cookie_secure, "samesite": "none", "path": "/"}
+
+def build_cookie_kwargs(secure: bool) -> dict:
+    """Browsers drop a SameSite=none cookie that is not Secure, and report nothing,
+    so the two move together instead of being configured independently."""
+    return {"httponly": True, "secure": secure, "samesite": "none" if secure else "lax", "path": "/"}
+
+
+COOKIE_KWARGS = build_cookie_kwargs(settings.cookie_secure)
 
 
 class AuthInput(BaseModel):

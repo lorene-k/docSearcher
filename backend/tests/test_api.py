@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 from supabase_auth.errors import AuthApiError
 
+from app.api.auth import build_cookie_kwargs
 from app.config import settings
 from app.main import app
 from app.middleware import rate_limit as rate_limit_module
@@ -422,3 +423,13 @@ class TestConversations:
             headers=auth_headers(),
         )
         assert r.status_code == 422
+
+
+class TestSessionCookieAttributes:
+    """A SameSite=none cookie without Secure is dropped by the browser, silently."""
+
+    def test_secure_cookies_are_samesite_none(self):
+        assert build_cookie_kwargs(True) == {"httponly": True, "secure": True, "samesite": "none", "path": "/"}
+
+    def test_insecure_cookies_fall_back_to_samesite_lax(self):
+        assert build_cookie_kwargs(False) == {"httponly": True, "secure": False, "samesite": "lax", "path": "/"}
