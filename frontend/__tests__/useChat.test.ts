@@ -6,7 +6,17 @@ jest.mock("@/lib/api", () => ({
     chat: jest.fn(),
 }));
 
-const mockChat = api.chat as jest.MockedFunction<typeof api.chat>;
+const mockChat = jest.mocked(api.chat);
+
+type ChatResult = { current: ReturnType<typeof useChat> };
+
+const renderChat = (): ChatResult => renderHook(() => useChat()).result;
+
+const send = async (result: ChatResult, question: string, conversationId?: string): Promise<void> => {
+    await act(async () => {
+        await result.current.sendMessage(question, conversationId);
+    });
+};
 
 describe("useChat", () => {
     beforeEach(() => {
@@ -14,7 +24,7 @@ describe("useChat", () => {
     });
 
     it("initialises with empty state", () => {
-        const { result } = renderHook(() => useChat());
+        const result = renderChat();
         expect(result.current.messages).toEqual([]);
         expect(result.current.loading).toBe(false);
         expect(result.current.error).toBe("");
@@ -25,18 +35,16 @@ describe("useChat", () => {
             answer: "Here is the answer.",
             sources: [{ filename: "doc.pdf", chunk_text: "...", relevance: "high" }],
         });
+        const result = renderChat();
 
-        const { result } = renderHook(() => useChat());
+        await send(result, "What is the policy?");
 
-        await act(async () => {
-            await result.current.sendMessage("What is the policy?");
-        });
-
+        const [userMessage, botMessage] = result.current.messages;
         expect(result.current.messages).toHaveLength(2);
-        expect(result.current.messages[0]).toEqual({ text: "What is the policy?", sender: "user" });
-        expect(result.current.messages[1].sender).toBe("bot");
-        expect(result.current.messages[1].text).toBe("Here is the answer.");
-        expect(result.current.messages[1].sources).toHaveLength(1);
+        expect(userMessage).toEqual({ text: "What is the policy?", sender: "user" });
+        expect(botMessage.sender).toBe("bot");
+        expect(botMessage.text).toBe("Here is the answer.");
+        expect(botMessage.sources).toHaveLength(1);
         expect(result.current.loading).toBe(false);
     });
 
@@ -46,63 +54,54 @@ describe("useChat", () => {
             { filename: "low.pdf", chunk_text: "weak match", relevance: "low" as const },
         ];
         mockChat.mockResolvedValueOnce({ answer: "ok", sources });
+        const result = renderChat();
 
-        const { result } = renderHook(() => useChat());
-
-        await act(async () => {
-            await result.current.sendMessage("question");
-        });
+        await send(result, "question");
 
         expect(result.current.messages[1].sources).toEqual(sources);
     });
 
     it("passes conversationId to chat()", async () => {
         mockChat.mockResolvedValueOnce({ answer: "ok", sources: [] });
+        const result = renderChat();
 
-        const { result } = renderHook(() => useChat());
-
-        await act(async () => {
-            await result.current.sendMessage("question", "conv-123");
-        });
+        await send(result, "question", "conv-123");
 
         expect(mockChat).toHaveBeenCalledWith("question", "conv-123");
     });
 
-    it("sets error message on API failure", async () => {
+    it("sets error message on API failure and keeps only the user message", async () => {
         mockChat.mockRejectedValueOnce(new Error("Network error"));
+        const result = renderChat();
 
-        const { result } = renderHook(() => useChat());
-
-        await act(async () => {
-            await result.current.sendMessage("question");
-        });
+        await send(result, "question");
 
         expect(result.current.error).toBe("Something went wrong. Please try again.");
-        expect(result.current.messages).toHaveLength(1); // only user message added
+        expect(result.current.messages).toHaveLength(1);
         expect(result.current.loading).toBe(false);
     });
 
     it("clears error before each new message", async () => {
         mockChat.mockRejectedValueOnce(new Error("fail"));
-        const { result } = renderHook(() => useChat());
+        const result = renderChat();
 
-        await act(async () => {
-            await result.current.sendMessage("q1");
-        });
+        await send(result, "q1");
         expect(result.current.error).toBeTruthy();
 
         mockChat.mockResolvedValueOnce({ answer: "ok", sources: [] });
-        await act(async () => {
-            await result.current.sendMessage("q2");
-        });
+        await send(result, "q2");
         expect(result.current.error).toBe("");
     });
 
     it("sets loading to true during fetch then false after", async () => {
-        let resolve!: (v: { answer: string; sources: [] }) => void;
-        mockChat.mockImplementationOnce(() => new Promise((r) => { resolve = r; }));
-
-        const { result } = renderHook(() => useChat());
+        let resolveChat!: (response: { answer: string; sources: [] }) => void;
+        mockChat.mockImplementationOnce(
+            () =>
+                new Promise((resolve) => {
+                    resolveChat = resolve;
+                }),
+        );
+        const result = renderChat();
 
         act(() => {
             result.current.sendMessage("question");
@@ -110,7 +109,7 @@ describe("useChat", () => {
         expect(result.current.loading).toBe(true);
 
         await act(async () => {
-            resolve({ answer: "done", sources: [] });
+            resolveChat({ answer: "done", sources: [] });
         });
         expect(result.current.loading).toBe(false);
     });

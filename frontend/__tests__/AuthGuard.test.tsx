@@ -6,6 +6,14 @@ jest.mock("next/navigation", () => ({
     useRouter: () => ({ replace: mockReplace }),
 }));
 
+const renderGuard = (): void => {
+    render(
+        <AuthGuard>
+            <p>protected content</p>
+        </AuthGuard>,
+    );
+};
+
 describe("AuthGuard", () => {
     beforeEach(() => {
         localStorage.clear();
@@ -13,7 +21,7 @@ describe("AuthGuard", () => {
     });
 
     it("redirects to /login and renders nothing when no session is stored", () => {
-        render(<AuthGuard><p>protected content</p></AuthGuard>);
+        renderGuard();
 
         expect(mockReplace).toHaveBeenCalledWith("/login");
         expect(screen.queryByText("protected content")).toBeNull();
@@ -22,7 +30,7 @@ describe("AuthGuard", () => {
     it("renders the protected content when a session is stored", () => {
         localStorage.setItem("user_email", "a@b.com");
 
-        render(<AuthGuard><p>protected content</p></AuthGuard>);
+        renderGuard();
 
         expect(screen.queryByText("protected content")).not.toBeNull();
         expect(mockReplace).not.toHaveBeenCalled();

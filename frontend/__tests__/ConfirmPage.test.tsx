@@ -17,6 +17,10 @@ describe("ConfirmPage", () => {
         mockConfirmEmail.mockReset();
     });
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it("shows the invalid-link message without calling the backend when the link has no token", () => {
         mockSearch = "";
 
@@ -29,6 +33,7 @@ describe("ConfirmPage", () => {
     it("sends the single-use token exactly once, even under StrictMode, then navigates to the chat", async () => {
         mockSearch = "token_hash=pkce_abc&type=email";
         mockConfirmEmail.mockResolvedValue(true);
+        // jsdom cannot navigate, so the redirect to /chat shows up as a "navigation" console error
         const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
 
         render(
@@ -43,7 +48,6 @@ describe("ConfirmPage", () => {
         );
         expect(mockConfirmEmail).toHaveBeenCalledTimes(1);
         expect(mockConfirmEmail).toHaveBeenCalledWith("pkce_abc", "email");
-        consoleError.mockRestore();
     });
 
     it("shows the invalid-link message when the backend rejects the token", async () => {

@@ -46,6 +46,10 @@ describe("api 401 interceptor", () => {
         localStorage.clear();
     });
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it("refreshes the session and retries the original request once", async () => {
         serve({
             "GET /documents": expired(["a.pdf"]),
@@ -89,6 +93,7 @@ describe("api 401 interceptor", () => {
     });
 
     it("clears the stored session and sends the user to /login when refresh fails", async () => {
+        // jsdom cannot navigate, so the redirect to /login shows up as a "navigation" console error
         const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
         localStorage.setItem("user_email", "a@b.com");
         serve({
@@ -99,7 +104,6 @@ describe("api 401 interceptor", () => {
         await expect(getDocuments()).rejects.toBeDefined();
         expect(localStorage.getItem("user_email")).toBeNull();
         expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining("navigation") }));
-        consoleError.mockRestore();
     });
 
     it("passes non-401 errors straight through without refreshing", async () => {

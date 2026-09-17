@@ -7,14 +7,20 @@ jest.mock("@/lib/api", () => ({
     deleteDocument: jest.fn(),
 }));
 
-const mockGetDocuments = api.getDocuments as jest.MockedFunction<typeof api.getDocuments>;
-const mockDeleteDocument = api.deleteDocument as jest.MockedFunction<typeof api.deleteDocument>;
+const mockGetDocuments = jest.mocked(api.getDocuments);
+const mockDeleteDocument = jest.mocked(api.deleteDocument);
 
-const renderLoaded = async () => {
+type DocumentsResult = { current: ReturnType<typeof useDocuments> };
+
+const renderUntilLoaded = async (): Promise<DocumentsResult> => {
+    const { result } = renderHook(() => useDocuments());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    return result;
+};
+
+const renderWithTwoDocuments = (): Promise<DocumentsResult> => {
     mockGetDocuments.mockResolvedValueOnce(["a.pdf", "b.pdf"]);
-    const hook = renderHook(() => useDocuments());
-    await waitFor(() => expect(hook.result.current.loading).toBe(false));
-    return hook;
+    return renderUntilLoaded();
 };
 
 describe("useDocuments", () => {
@@ -23,20 +29,19 @@ describe("useDocuments", () => {
     });
 
     it("loads documents on mount", async () => {
-        const { result } = await renderLoaded();
+        const result = await renderWithTwoDocuments();
         expect(result.current.documents).toEqual(["a.pdf", "b.pdf"]);
         expect(result.current.error).toBe("");
     });
 
     it("sets an error when loading fails", async () => {
         mockGetDocuments.mockRejectedValueOnce(new Error("500"));
-        const { result } = renderHook(() => useDocuments());
-        await waitFor(() => expect(result.current.loading).toBe(false));
+        const result = await renderUntilLoaded();
         expect(result.current.error).toBe("Could not load documents.");
     });
 
     it("removes a document once the backend confirms the delete", async () => {
-        const { result } = await renderLoaded();
+        const result = await renderWithTwoDocuments();
         mockDeleteDocument.mockResolvedValueOnce();
 
         await act(async () => {
@@ -49,12 +54,14 @@ describe("useDocuments", () => {
     });
 
     it("puts the document back and reports an error when the backend delete fails", async () => {
-        const { result } = await renderLoaded();
+        const result = await renderWithTwoDocuments();
         mockDeleteDocument.mockRejectedValueOnce(new Error("404"));
 
         let thrown: unknown;
         await act(async () => {
-            await result.current.remove("a.pdf").catch((e) => { thrown = e; });
+            await result.current.remove("a.pdf").catch((error: unknown) => {
+                thrown = error;
+            });
         });
 
         expect(thrown).toBeInstanceOf(Error);

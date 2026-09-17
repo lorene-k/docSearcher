@@ -6,8 +6,19 @@ jest.mock("@/lib/api", () => ({
     uploadDocument: jest.fn(),
 }));
 
-const mockUploadDocument = api.uploadDocument as jest.MockedFunction<typeof api.uploadDocument>;
+const mockUploadDocument = jest.mocked(api.uploadDocument);
 const pdf = new File(["%PDF"], "doc.pdf", { type: "application/pdf" });
+
+type UploadResult = { current: ReturnType<typeof useUpload> };
+
+const renderAfterFailedUpload = async (): Promise<UploadResult> => {
+    mockUploadDocument.mockRejectedValueOnce(new Error("500"));
+    const { result } = renderHook(() => useUpload());
+    await act(async () => {
+        await result.current.upload(pdf);
+    });
+    return result;
+};
 
 describe("useUpload", () => {
     beforeEach(() => {
@@ -40,23 +51,14 @@ describe("useUpload", () => {
     });
 
     it("moves to the error step with a message when the upload fails", async () => {
-        mockUploadDocument.mockRejectedValueOnce(new Error("500"));
-        const { result } = renderHook(() => useUpload());
-
-        await act(async () => {
-            await result.current.upload(pdf);
-        });
+        const result = await renderAfterFailedUpload();
 
         expect(result.current.step).toBe("error");
         expect(result.current.errorMessage).toBe("Something went wrong during the upload.");
     });
 
     it("reset returns to a clean idle state", async () => {
-        mockUploadDocument.mockRejectedValueOnce(new Error("500"));
-        const { result } = renderHook(() => useUpload());
-        await act(async () => {
-            await result.current.upload(pdf);
-        });
+        const result = await renderAfterFailedUpload();
 
         act(() => result.current.reset());
 
