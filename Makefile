@@ -1,3 +1,7 @@
+CERT_DIR :=	certs
+CERT :=		$(CERT_DIR)/localhost.pem
+KEY :=		$(CERT_DIR)/localhost-key.pem
+
 all:		dev
 
 install:	install-backend install-frontend
@@ -8,16 +12,26 @@ install-backend:
 install-frontend:
 			cd frontend && npm install
 
-dev:
+certs:		$(CERT)
+
+$(CERT):
+			@command -v mkcert >/dev/null || { echo "mkcert is missing: brew install mkcert"; exit 1; }
+			mkcert -install
+			mkdir -p $(CERT_DIR)
+			mkcert -cert-file $(CERT) -key-file $(KEY) localhost 127.0.0.1 ::1
+
+dev:		certs
 			@trap 'kill 0' EXIT; \
-			(cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000) & \
+			(cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000 \
+				--ssl-keyfile ../$(KEY) --ssl-certfile ../$(CERT)) & \
 			(cd frontend && npm run dev) & \
 			wait
 
-backend:
-			cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000
+backend:	certs
+			cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000 \
+				--ssl-keyfile ../$(KEY) --ssl-certfile ../$(CERT)
 
-frontend:
+frontend:	certs
 			cd frontend && npm run dev
 
 test: 		test-backend test-frontend
@@ -53,5 +67,5 @@ coverage-frontend:
 			cd frontend && npm test -- --coverage
 
 
-.PHONY: all install install-backend install-frontend dev backend frontend test test-backend test-frontend \
+.PHONY: all install install-backend install-frontend certs dev backend frontend test test-backend test-frontend \
 		lint lint-backend lint-frontend format format-backend format-frontend coverage coverage-backend coverage-frontend

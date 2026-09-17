@@ -1,6 +1,6 @@
 # docSearcher
 
-An internal knowledge base with RAG (Retrieval-Augmented Generation).
+An internal knowledge base with RAG.
 
 Upload documents, ask questions in natural language, and get sourced answers.
 
@@ -26,6 +26,7 @@ Upload documents, ask questions in natural language, and get sourced answers.
 - Python 3.14
 - Node.js 20+
 - Docker and the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started), for the local database
+- [mkcert](https://github.com/FiloSottile/mkcert) (`brew install mkcert`), for the local HTTPS certificate
 - A hosted Supabase project for production
 - A Google AI Studio API key
 - A Groq API key (optional, only needed for LLM fallback)
@@ -50,13 +51,13 @@ npm install
 
 ## Configuration
 
-Copy `backend/.env.example` to `backend/.env` and fill in the Supabase URL and keys for the environment you are running against (see below), plus your Google and Groq keys.
+Copy `backend/.env.example` to `backend/.env` and fill in the Supabase URL and keys from `supabase status`, plus your Google and Groq keys. That file is for local development only; in production the same variables are set in the Render dashboard, and Vercel holds `NEXT_PUBLIC_API_URL` for the frontend. The frontend needs no env file locally, since it defaults to `https://localhost:8000`.
 
-`frontend/.env.local`:
+## Local HTTPS
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+Both dev servers run over HTTPS, so the `Secure` session cookies behave exactly as they do in production instead of needing a separate local code path. `make certs` issues a certificate for `localhost` into `certs/` (gitignored) with mkcert, and `mkcert -install` adds its local CA to your system trust store so the browser accepts it without warnings; it asks for your password the first time. The `dev`, `backend` and `frontend` targets depend on the certificate file, so it is created once and reused afterwards. Delete `certs/` to issue a new one.
+
+The frontend then serves on https://localhost:3000 and the backend on https://localhost:8000. The Supabase stack stays on plain http, since only the backend talks to it, never the browser.
 
 ## Database: development and production
 
@@ -71,7 +72,7 @@ supabase start
 supabase db reset
 ```
 
-`supabase status` prints the local API URL and keys to put in `backend/.env`. The local stack also serves Studio at http://127.0.0.1:54323 and Mailpit at http://127.0.0.1:54324, which catches every email the local Auth server sends, including sign-up confirmations. Its Auth settings (confirmation required, Site URL `http://localhost:3000`, and the confirmation template) come from `backend/supabase/config.toml`, so nothing needs to be set by hand. Stop the stack with `supabase stop`.
+`supabase status` prints the local API URL and keys to put in `backend/.env`. The local stack also serves Studio at http://127.0.0.1:54323 and Mailpit at http://127.0.0.1:54324, which catches every email the local Auth server sends, including sign-up confirmations. Its Auth settings (confirmation required, Site URL `https://localhost:3000`, and the confirmation template) come from `backend/supabase/config.toml`, so nothing needs to be set by hand. Stop the stack with `supabase stop`.
 
 To change the schema, create a migration with `supabase migration new <name>`, write the SQL, and apply it locally with `supabase db reset`.
 
@@ -101,16 +102,9 @@ make dev
 
 Or start them separately:
 
-**Backend**
-
 ```bash
-cd backend
-uvicorn app.main:app --reload --port 8000
+make backend
+make frontend
 ```
 
-**Frontend**
-
-```bash
-cd frontend
-npm run dev
-```
+Both require the certificate from `make certs`, which they create on first run.
