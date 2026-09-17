@@ -40,6 +40,7 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 - `POST /auth/register` - create an account (requires email confirmation before login)
 - `POST /auth/login` - log in, sets httpOnly session cookies
 - `POST /auth/confirm` - verifies the email confirmation link and logs the user in
+- `POST /auth/resend` - sends a fresh confirmation link, always answers 202 so it cannot reveal who has an account
 - `POST /auth/refresh` - silent token refresh
 - `POST /auth/logout`
 - `POST /upload` - receives PDF, chunks, embeds, stores in Supabase
@@ -68,5 +69,6 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 ## Auth and RBAC
 - Auth is Supabase Auth (email/password), not a custom users table - session is httpOnly cookies (access + refresh) set by the backend, with silent refresh on 401
 - Email confirmation is required - registering does not log the user in; clicking the emailed link opens /auth/confirm, which logs the user in and redirects to /chat
+- An expired or used link is recoverable: /auth/confirm and the login page both offer a resend, and a login with an unconfirmed address answers 403 (not 401) so the UI can say so
 - `public.users` mirrors `auth.users` (id, email) through database triggers - never write to it from the app, and never store passwords there
 - RBAC is not implemented yet - every authenticated user currently has equal access, this is being designed as an org-based model (org owner/admin/member roles, groups, per-document visibility) - see DECISIONS.md and RBAC_TODO.md
