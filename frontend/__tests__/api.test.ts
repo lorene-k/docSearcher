@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { getDocuments, getConversations, login, register, refresh, errorCode } from "@/lib/api";
+import { getDocuments, getConversations, getGroups, login, register, refresh, errorCode } from "@/lib/api";
 
 // lib/api.ts calls axios.create() at import time, before any test-file binding exists,
 // so the created instance is stashed on the mocked module itself.
@@ -39,6 +39,8 @@ const serve = (routes: Record<string, Handler>) => {
     };
 };
 
+const PROFILE = { first_name: "Ada", last_name: "Lovelace", org_name: "Analytical Engines" };
+
 const expired =
     (okData: unknown): Handler =>
     (_config, attempt) =>
@@ -47,6 +49,7 @@ const expired =
 describe("api 401 interceptor", () => {
     beforeEach(() => {
         localStorage.clear();
+        localStorage.setItem("user_email", "a@b.com");
     });
 
     afterEach(() => {
@@ -59,13 +62,13 @@ describe("api 401 interceptor", () => {
             "POST /auth/refresh": () => ({ status: 200 }),
         });
 
-        await expect(getDocuments()).resolves.toEqual(["a.pdf"]);
+        await expect(getDocuments()).resolves.toMatchObject([{ filename: "a.pdf" }]);
         expect(calls).toEqual(["GET /documents", "POST /auth/refresh", "GET /documents"]);
     });
 
     it.each([
         ["login", () => login("a@b.com", "wrong"), "POST /auth/login"],
-        ["register", () => register("a@b.com", "pw"), "POST /auth/register"],
+        ["register", () => register("a@b.com", "pw", PROFILE), "POST /auth/register"],
         ["refresh", () => refresh(), "POST /auth/refresh"],
     ])("does not try to refresh when %s itself returns 401", async (_name, call, route) => {
         serve({ [route]: () => ({ status: 401 }) });
@@ -81,7 +84,10 @@ describe("api 401 interceptor", () => {
             "POST /auth/refresh": () => ({ status: 200 }),
         });
 
-        await expect(Promise.all([getDocuments(), getConversations()])).resolves.toEqual([["a.pdf"], []]);
+        await expect(Promise.all([getDocuments(), getConversations()])).resolves.toMatchObject([
+            [{ filename: "a.pdf" }],
+            [],
+        ]);
         expect(calls.filter((c) => c === "POST /auth/refresh")).toHaveLength(1);
     });
 
@@ -119,18 +125,70 @@ describe("api 401 interceptor", () => {
     });
 });
 
+describe("register", () => {
+    beforeEach(() => localStorage.clear());
+
+    it("sends the profile and org name along with the credentials", async () => {
+        let body: unknown;
+        serve({
+            "POST /auth/register": (config) => {
+                body = JSON.parse(config.data as string);
+                return { status: 202, data: { status: "confirmation_required" } };
+            },
+        });
+
+        await register("a@b.com", "pw", PROFILE);
+
+        expect(body).toEqual({ email: "a@b.com", password: "pw", ...PROFILE });
+    });
+
+    it("remembers the org locally until the backend returns it", async () => {
+        serve({ "POST /auth/register": () => ({ status: 202, data: { status: "confirmation_required" } }) });
+
+        await register("a@b.com", "pw", PROFILE);
+
+        expect(localStorage.getItem("docsearcher:placeholder")).toContain("Analytical Engines");
+    });
+});
+
+describe("placeholder fallback", () => {
+    beforeEach(() => localStorage.clear());
+
+    it("answers from the local store when the endpoint does not exist yet", async () => {
+        localStorage.setItem("user_email", "a@b.com");
+        serve({ "GET /org/groups": () => ({ status: 404 }) });
+
+        await expect(getGroups()).resolves.toEqual([]);
+        expect(localStorage.getItem("docsearcher:placeholder-used")).toBe("1");
+    });
+
+    it("passes real answers straight through", async () => {
+        const groups = [{ id: "g1", name: "Research", admin_id: "u1", member_ids: [], created_at: "2026-01-01" }];
+        serve({ "GET /org/groups": () => ({ status: 200, data: groups }) });
+
+        await expect(getGroups()).resolves.toEqual(groups);
+        expect(localStorage.getItem("docsearcher:placeholder-used")).toBeNull();
+    });
+
+    it("still surfaces other errors", async () => {
+        serve({ "GET /org/groups": () => ({ status: 500 }) });
+
+        await expect(getGroups()).rejects.toMatchObject({ response: { status: 500 } });
+    });
+});
+
 describe("errorCode", () => {
     it("reads the code the backend puts in detail", async () => {
         serve({ "POST /auth/register": () => ({ status: 409, data: { detail: "email_exists" } }) });
 
-        const error = await register("a@b.com", "pw").catch((e: unknown) => e);
+        const error = await register("a@b.com", "pw", PROFILE).catch((e: unknown) => e);
         expect(errorCode(error)).toBe("email_exists");
     });
 
     it("returns an empty code when the response carries no usable detail", async () => {
         serve({ "POST /auth/register": () => ({ status: 500, data: { detail: { message: "boom" } } }) });
 
-        const error = await register("a@b.com", "pw").catch((e: unknown) => e);
+        const error = await register("a@b.com", "pw", PROFILE).catch((e: unknown) => e);
         expect(errorCode(error)).toBe("");
     });
 
