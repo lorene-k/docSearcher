@@ -33,10 +33,10 @@ export default function Navbar() {
     const links = me ? LINKS.filter((link) => !link.show || link.show(me)) : [];
 
     const linkClass = (href: string): string =>
-        `btn btn-ghost ${pathname === href ? "bg-base text-plum-deep" : "text-muted"}`;
+        `btn btn-ghost ${pathname === href ? "bg-surface text-plum-deep" : "text-muted"}`;
 
     return (
-        <header className="border-b border-line bg-surface">
+        <header className="bg-base">
             <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:px-12">
                 <Link
                     href="/"
@@ -91,7 +91,7 @@ export default function Navbar() {
             </nav>
 
             {me && open && (
-                <div className="border-t border-line bg-surface px-4 py-3 sm:px-8 md:hidden">
+                <div className="bg-base px-4 py-3 sm:px-8 md:hidden">
                     <ul className="flex flex-col gap-1">
                         {links.map(({ href, label }) => (
                             <li key={href}>

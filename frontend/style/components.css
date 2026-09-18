@@ -37,7 +37,7 @@
         @apply border border-plum bg-transparent text-plum ring-plum/40 hover:bg-plum-soft;
     }
     .btn-ghost {
-        @apply bg-transparent text-ink ring-plum/30 hover:bg-base;
+        @apply bg-transparent text-ink ring-plum/30 hover:bg-surface;
     }
     .btn-danger {
         @apply bg-transparent text-danger ring-danger/30 hover:bg-danger-soft;
