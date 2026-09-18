@@ -33,8 +33,3 @@ app.include_router(upload_router)
 app.include_router(chat_router)
 app.include_router(documents_router)
 app.include_router(conversations_router)
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
