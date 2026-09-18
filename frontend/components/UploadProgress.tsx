@@ -8,17 +8,15 @@ const STEPS: { key: UploadStep; label: string }[] = [
     { key: "indexing", label: "Indexing" },
     { key: "done", label: "Done" },
 ];
-const STEP_ORDER: UploadStep[] = ["uploading", "processing", "indexing", "done"];
 
 export default function UploadProgress({ step, progress, chunksCreated }: Props) {
-    const currentIndex = STEP_ORDER.indexOf(step);
+    const currentIndex = STEPS.findIndex((s) => s.key === step);
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
                 {STEPS.map(({ key, label }, i) => {
-                    const idx = STEP_ORDER.indexOf(key);
-                    const done = idx < currentIndex;
-                    const active = idx === currentIndex;
+                    const done = i < currentIndex;
+                    const active = i === currentIndex;
                     return (
                         <div key={key} className="flex items-center gap-2">
                             <div
