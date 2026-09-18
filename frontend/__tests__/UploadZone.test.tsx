@@ -13,6 +13,7 @@ jest.mock("@/hooks/useUpload", () => ({
     }),
 }));
 
+const OPTIONS = { visibility: "org" as const, groupId: null };
 const INVALID_TYPE_MESSAGE = "Only PDF files are accepted.";
 const pdf = new File(["%PDF"], "doc.pdf", { type: "application/pdf" });
 const notPdf = new File(["hello"], "notes.txt", { type: "text/plain" });
@@ -25,7 +26,7 @@ describe("UploadZone", () => {
     });
 
     it("rejects a non-PDF picked through the file input", () => {
-        const { container } = render(<UploadZone />);
+        const { container } = render(<UploadZone options={OPTIONS} />);
 
         fireEvent.change(fileInput(container), { target: { files: [notPdf] } });
 
@@ -34,21 +35,21 @@ describe("UploadZone", () => {
     });
 
     it("rejects a non-PDF dropped onto the zone", () => {
-        render(<UploadZone />);
+        render(<UploadZone options={OPTIONS} />);
 
-        fireEvent.drop(screen.getByText(/Drag a PDF file here/), { dataTransfer: { files: [notPdf] } });
+        fireEvent.drop(screen.getByText(/Drop a PDF here/), { dataTransfer: { files: [notPdf] } });
 
         expect(mockUpload).not.toHaveBeenCalled();
         expect(screen.queryByText(INVALID_TYPE_MESSAGE)).not.toBeNull();
     });
 
     it("uploads a PDF and clears a previous type error", () => {
-        const { container } = render(<UploadZone />);
+        const { container } = render(<UploadZone options={OPTIONS} />);
         fireEvent.change(fileInput(container), { target: { files: [notPdf] } });
 
         fireEvent.change(fileInput(container), { target: { files: [pdf] } });
 
-        expect(mockUpload).toHaveBeenCalledWith(pdf);
+        expect(mockUpload).toHaveBeenCalledWith(pdf, OPTIONS);
         expect(screen.queryByText(INVALID_TYPE_MESSAGE)).toBeNull();
     });
 });
