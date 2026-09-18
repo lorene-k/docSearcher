@@ -1,22 +1,49 @@
 @import "tailwindcss";
+@import "../style/components.css";
 
 @theme inline {
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+    --font-sans: Futura, "Futura PT", var(--font-jost), "Century Gothic", sans-serif;
 }
 
-@utility card {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+@theme {
+    /* Slightly larger than Tailwind's defaults: text stays sm, hints xs, per the design brief */
+    --text-xs: 0.8125rem;
+    --text-xs--line-height: 1.25rem;
+    --text-sm: 0.9375rem;
+    --text-sm--line-height: 1.5rem;
+    --text-base: 1.0625rem;
+    --text-base--line-height: 1.625rem;
+    --text-lg: 1.1875rem;
+    --text-lg--line-height: 1.75rem;
+
+    --color-base: #f1f2f6;
+    --color-ink: #241d33;
+    --color-muted: #6c6480;
+    --color-line: #dcd5ea;
+    --color-lilac: #e9e2f5;
+    --color-lilac-deep: #d6cbea;
+    --color-plum: #6a4c9c;
+    --color-plum-deep: #4f3778;
+    --color-plum-soft: #f3eefa;
+    --color-success: #2e7d5b;
+    --color-success-soft: #e3f3ec;
+    --color-warning: #a8712b;
+    --color-warning-soft: #f8efe0;
+    --color-danger: #b3261e;
+    --color-danger-soft: #fbe9e7;
 }
 
-@utility page-container {
-    max-width: 42rem;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 2.5rem 1.5rem;
+@layer base {
+    html {
+        line-height: 1.5;
+    }
+    body {
+        background-color: var(--color-base);
+        color: var(--color-ink);
+    }
+    ::selection {
+        background-color: var(--color-lilac-deep);
+    }
 }
 
 @keyframes fadeSlideIn {
@@ -30,6 +57,10 @@
     }
 }
 
-.animate-fade-slide-in {
+/* A utility rather than a plain class, so variants such as open: can target it */
+@utility animate-fade-slide-in {
     animation: fadeSlideIn 0.2s ease-out;
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
 }

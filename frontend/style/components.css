@@ -1,0 +1,93 @@
+/* Shared component classes, per the design brief: one place for styles used by several elements */
+
+@layer components {
+    /* Pages spread across wide screens and keep a comfortable margin on the sides */
+    .page {
+        @apply mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12;
+    }
+
+    .page-title {
+        @apply text-2xl font-medium tracking-tight text-ink;
+    }
+
+    .page-lead {
+        @apply mt-1 text-sm text-muted;
+    }
+
+    .section-title {
+        @apply font-medium text-base text-ink;
+    }
+
+    .hint {
+        @apply text-xs text-muted;
+    }
+
+    .link {
+        @apply rounded-sm text-plum underline decoration-lilac-deep underline-offset-4 transition-colors outline-none hover:decoration-plum focus-visible:ring-2 focus-visible:ring-plum/40;
+    }
+
+    /* Buttons: every button shows its focus ring on hover as well as on keyboard focus */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap ring-offset-2 ring-offset-base transition-colors outline-none hover:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:ring-0;
+    }
+    .btn-primary {
+        @apply bg-plum text-white ring-plum/40 hover:bg-plum-deep;
+    }
+    .btn-outline {
+        @apply border border-plum bg-transparent text-plum ring-plum/40 hover:bg-plum-soft;
+    }
+    .btn-ghost {
+        @apply bg-transparent text-ink ring-plum/30 hover:bg-lilac;
+    }
+    .btn-danger {
+        @apply bg-transparent text-danger ring-danger/30 hover:bg-danger-soft;
+    }
+    .btn-sm {
+        @apply px-3 py-1.5 text-xs;
+    }
+
+    .field {
+        @apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink transition-shadow outline-none placeholder:text-muted/70 focus:border-plum focus:ring-2 focus:ring-plum/25 disabled:bg-base disabled:text-muted;
+    }
+    .label {
+        @apply mb-1 block text-xs font-medium text-ink;
+    }
+
+    .card {
+        @apply rounded-xl border border-line bg-white;
+    }
+    .panel {
+        @apply rounded-2xl bg-lilac;
+    }
+
+    /* Small status pills, for roles and visibility */
+    .pill {
+        @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+    }
+    .pill-plum {
+        @apply bg-plum text-white;
+    }
+    .pill-lilac {
+        @apply bg-lilac text-plum-deep;
+    }
+    .pill-neutral {
+        @apply bg-base text-muted;
+    }
+    .pill-success {
+        @apply bg-success-soft text-success;
+    }
+    .pill-warning {
+        @apply bg-warning-soft text-warning;
+    }
+    .pill-danger {
+        @apply bg-danger-soft text-danger;
+    }
+
+    /* Rows of a list separated by hairlines, used for members, groups and documents */
+    .rows > * + * {
+        @apply border-t border-line;
+    }
+    .row {
+        @apply flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3;
+    }
+}
