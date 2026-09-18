@@ -8,6 +8,19 @@ jest.mock("@/lib/api", () => ({
 }));
 
 const mockGetDocuments = jest.mocked(api.getDocuments);
+
+const doc = (filename: string): api.Document => ({
+    id: filename,
+    filename,
+    visibility: "org",
+    uploader_id: "u1",
+    uploader_name: "Ada",
+    group_id: null,
+    group_name: null,
+    created_at: "2026-01-01T00:00:00Z",
+});
+const A = doc("a.pdf");
+const B = doc("b.pdf");
 const mockDeleteDocument = jest.mocked(api.deleteDocument);
 
 type DocumentsResult = { current: ReturnType<typeof useDocuments> };
@@ -19,7 +32,7 @@ const renderUntilLoaded = async (): Promise<DocumentsResult> => {
 };
 
 const renderWithTwoDocuments = (): Promise<DocumentsResult> => {
-    mockGetDocuments.mockResolvedValueOnce(["a.pdf", "b.pdf"]);
+    mockGetDocuments.mockResolvedValueOnce([A, B]);
     return renderUntilLoaded();
 };
 
@@ -30,7 +43,7 @@ describe("useDocuments", () => {
 
     it("loads documents on mount", async () => {
         const result = await renderWithTwoDocuments();
-        expect(result.current.documents).toEqual(["a.pdf", "b.pdf"]);
+        expect(result.current.documents).toEqual([A, B]);
         expect(result.current.error).toBe("");
     });
 
@@ -45,11 +58,11 @@ describe("useDocuments", () => {
         mockDeleteDocument.mockResolvedValueOnce();
 
         await act(async () => {
-            await result.current.remove("a.pdf");
+            await result.current.remove(A);
         });
 
-        expect(mockDeleteDocument).toHaveBeenCalledWith("a.pdf");
-        expect(result.current.documents).toEqual(["b.pdf"]);
+        expect(mockDeleteDocument).toHaveBeenCalledWith(A);
+        expect(result.current.documents).toEqual([B]);
         expect(result.current.error).toBe("");
     });
 
@@ -59,13 +72,13 @@ describe("useDocuments", () => {
 
         let thrown: unknown;
         await act(async () => {
-            await result.current.remove("a.pdf").catch((error: unknown) => {
+            await result.current.remove(A).catch((error: unknown) => {
                 thrown = error;
             });
         });
 
         expect(thrown).toBeInstanceOf(Error);
-        expect(result.current.documents).toContain("a.pdf");
+        expect(result.current.documents).toContainEqual(A);
         expect(result.current.documents).toHaveLength(2);
         expect(result.current.error).toBe('Could not delete "a.pdf".');
     });

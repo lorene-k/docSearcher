@@ -1,12 +1,24 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getDocuments, deleteDocument } from "@/lib/api";
+import { getDocuments, deleteDocument, setDocumentVisibility } from "@/lib/api";
+import type { Document, Visibility } from "@/lib/model";
 
 export function useDocuments() {
-    const [documents, setDocuments] = useState<string[]>([]);
+    const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const reload = useCallback(async () => {
+        try {
+            setDocuments(await getDocuments());
+            setError("");
+        } catch {
+            setError("Could not load documents.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         // Ignores the response if the component unmounted before the request settled
@@ -26,16 +38,24 @@ export function useDocuments() {
         };
     }, []);
 
-    const remove = useCallback(async (filename: string) => {
-        setDocuments((prev) => prev.filter((d) => d !== filename));
+    const remove = useCallback(async (document: Document) => {
+        setDocuments((prev) => prev.filter((d) => d.id !== document.id));
         try {
-            await deleteDocument(filename);
+            await deleteDocument(document);
         } catch {
-            setDocuments((prev) => [...prev, filename]);
-            setError(`Could not delete "${filename}".`);
+            setDocuments((prev) => [...prev, document]);
+            setError(`Could not delete "${document.filename}".`);
             throw new Error("delete failed");
         }
     }, []);
 
-    return { documents, loading, error, remove };
+    const share = useCallback(
+        async (document: Document, visibility: Visibility, groupId: string | null) => {
+            await setDocumentVisibility(document, visibility, groupId);
+            await reload();
+        },
+        [reload],
+    );
+
+    return { documents, loading, error, remove, share };
 }
