@@ -3,46 +3,39 @@
 import { useState, useEffect, useRef } from "react";
 import MessageBubble from "@/components/MessageBubble";
 import Banner from "@/components/Banner";
-import { useChat } from "@/hooks/useChat";
-import type { Message } from "@/lib/api";
+import type { ChatMessage } from "@/hooks/useChat";
 
 type Props = {
-    conversationId?: string;
-    initialMessages?: Message[];
-    onEnsureConversation: () => Promise<string>;
+    messages: ChatMessage[];
+    loading: boolean;
+    error: string;
+    onSend: (text: string) => Promise<void>;
 };
 
-export default function ChatWindow({ conversationId, initialMessages = [], onEnsureConversation }: Props) {
+export default function ChatWindow({ messages, loading, error, onSend }: Props) {
     const [input, setInput] = useState("");
-    const { loading, error, messages, sendMessage } = useChat();
     const bottomRef = useRef<HTMLDivElement>(null);
-
-    const allMessages = [
-        ...initialMessages.map((m) => ({
-            text: m.text,
-            sender: m.role === "user" ? ("user" as const) : ("bot" as const),
-            sources: m.sources,
-        })),
-        ...messages,
-    ];
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [allMessages.length, loading]);
+    }, [messages.length, loading]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const submit = () => {
         if (!input.trim() || loading) return;
         const text = input;
         setInput("");
-        const id = conversationId ?? (await onEnsureConversation());
-        await sendMessage(text, id);
+        onSend(text);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        submit();
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            handleSubmit(e as unknown as React.FormEvent);
+            submit();
         }
     };
 
@@ -50,13 +43,13 @@ export default function ChatWindow({ conversationId, initialMessages = [], onEns
         <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-lg bg-white">
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-2">
                 {error && <Banner variant="error" message={error} />}
-                {allMessages.length === 0 && (
+                {messages.length === 0 && (
                     <p className="mt-10 text-center text-sm text-gray-400">Ask a question about your documents.</p>
                 )}
-                {allMessages.map((msg, i) => (
-                    <MessageBubble key={i} text={msg.text} sender={msg.sender} sources={msg.sources} />
+                {messages.map((msg, i) => (
+                    <MessageBubble key={i} text={msg.text} role={msg.role} sources={msg.sources} />
                 ))}
-                {loading && <MessageBubble sender="bot" text="" isTyping={true} />}
+                {loading && <MessageBubble role="assistant" text="" isTyping={true} />}
                 <div ref={bottomRef} />
             </div>
             <form onSubmit={handleSubmit} className="flex items-end gap-2 pt-4">

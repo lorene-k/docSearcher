@@ -1,17 +1,15 @@
 import SourceCard from "@/components/SourceCard";
+import type { Source } from "@/lib/api";
 
 type Props = {
     text: string;
-    sender?: "user" | "bot";
-    sources?: {
-        filename: string;
-        chunk_text: string;
-    }[];
+    role: "user" | "assistant";
+    sources?: Source[];
     isTyping?: boolean;
 };
 
-export default function MessageBubble({ text, sender, sources, isTyping }: Props) {
-    const isUser = sender === "user";
+export default function MessageBubble({ text, role, sources, isTyping }: Props) {
+    const isUser = role === "user";
 
     return (
         <div className={`animate-fade-slide-in flex ${isUser ? "justify-end" : "justify-start"}`}>

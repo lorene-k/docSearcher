@@ -41,8 +41,8 @@ describe("useChat", () => {
 
         const [userMessage, botMessage] = result.current.messages;
         expect(result.current.messages).toHaveLength(2);
-        expect(userMessage).toEqual({ text: "What is the policy?", sender: "user" });
-        expect(botMessage.sender).toBe("bot");
+        expect(userMessage).toEqual({ text: "What is the policy?", role: "user" });
+        expect(botMessage.role).toBe("assistant");
         expect(botMessage.text).toBe("Here is the answer.");
         expect(botMessage.sources).toHaveLength(1);
         expect(result.current.loading).toBe(false);
@@ -90,6 +90,17 @@ describe("useChat", () => {
 
         mockChat.mockResolvedValueOnce({ answer: "ok", sources: [] });
         await send(result, "q2");
+        expect(result.current.error).toBe("");
+    });
+
+    it("reset forgets the messages and the error", async () => {
+        mockChat.mockRejectedValueOnce(new Error("fail"));
+        const result = renderChat();
+        await send(result, "q1");
+
+        act(() => result.current.reset());
+
+        expect(result.current.messages).toEqual([]);
         expect(result.current.error).toBe("");
     });
 
