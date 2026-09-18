@@ -53,8 +53,10 @@ Internal knowledge base for small teams using RAG (Retrieval-Augmented Generatio
 ## Frontend conventions
 - All API calls centralized in lib/api.ts
 - NEXT_PUBLIC_API_URL env var for backend URL
-- Pages: /, /login, /auth/confirm, /chat, /documents, /upload
-- Components: UploadZone, ChatWindow, MessageBubble, SourceCard, Navbar, Toast, etc.
+- Pages: /, /login (log in and sign up with org name), /auth/confirm, /chat, /documents, /upload, /org (role-aware organization page), /account
+- Components: UploadZone, ChatWindow, MessageBubble, SourceCard, Navbar, Toast, Banner, Dialog, Badges, MeProvider (current user, role and org for every page), etc.
+- Shared styles live in frontend/style/components.css (button, field, card, pill classes); the palette and Futura/Jost font are defined in app/globals.css
+- Access rules are pure functions in lib/permissions.ts; endpoints the backend lacks are answered by lib/placeholders.ts until TODO-BACKEND.md is done
 
 ## Code conventions
 - English only, everywhere: code, identifiers, comments, UI text, error messages, LLM prompts, emails, tests, and docs. Never write French (or any other language) in this repo
