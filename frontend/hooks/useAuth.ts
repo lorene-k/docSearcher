@@ -11,6 +11,7 @@ import {
     isEmailNotConfirmedError,
     errorCode,
 } from "@/lib/api";
+import { getSessionEmail, setSessionEmail, subscribeToSession } from "@/lib/session";
 
 const REGISTER_ERRORS: Record<string, string> = {
     email_exists: "This email already has an account. Log in instead.",
@@ -23,32 +24,9 @@ const REGISTER_FALLBACK = "Could not create the account. Try again in a moment."
 
 export type AuthUser = { email: string };
 
-const SESSION_KEY = "user_email";
-const SESSION_EVENT = "session-change";
-
-// localStorage only fires "storage" for other tabs, so same-tab writes dispatch SESSION_EVENT
-const subscribeToSession = (onChange: () => void): (() => void) => {
-    window.addEventListener("storage", onChange);
-    window.addEventListener(SESSION_EVENT, onChange);
-    return () => {
-        window.removeEventListener("storage", onChange);
-        window.removeEventListener(SESSION_EVENT, onChange);
-    };
-};
-
-const setSessionEmail = (email: string | null): void => {
-    if (email) localStorage.setItem(SESSION_KEY, email);
-    else localStorage.removeItem(SESSION_KEY);
-    window.dispatchEvent(new Event(SESSION_EVENT));
-};
-
 // Returns undefined until the client has read localStorage (server render and hydration), null when logged out
 export const useSessionEmail = (): string | null | undefined =>
-    useSyncExternalStore(
-        subscribeToSession,
-        () => localStorage.getItem(SESSION_KEY),
-        () => undefined,
-    );
+    useSyncExternalStore(subscribeToSession, getSessionEmail, () => undefined);
 
 export function useAuth() {
     const router = useRouter();

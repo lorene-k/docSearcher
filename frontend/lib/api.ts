@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosProgressEvent, InternalAxiosRequestConfig } from "axios";
+import { setSessionEmail } from "@/lib/session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:8000";
 const api = axios.create({ baseURL: API_URL, withCredentials: true });
@@ -28,7 +29,7 @@ api.interceptors.response.use(
             return api(originalRequest);
         } catch (refreshError) {
             if (typeof window !== "undefined") {
-                localStorage.removeItem("user_email");
+                setSessionEmail(null);
                 window.location.href = "/login";
             }
             throw refreshError;
