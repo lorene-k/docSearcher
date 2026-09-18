@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
+import Banner from "@/components/Banner";
 import Toast from "@/components/Toast";
 import { useDocuments } from "@/hooks/useDocuments";
 
@@ -41,9 +42,7 @@ function DocumentsPageInner() {
                 />
             )}
 
-            {error && (
-                <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-            )}
+            {error && <Banner variant="error" className="mb-4" message={error} />}
 
             {loading && (
                 <ul className="flex flex-col gap-2">

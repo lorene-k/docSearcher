@@ -15,12 +15,13 @@ type Props = {
     variant: Variant;
     message: string;
     action?: { label: string; onClick: () => void };
+    className?: string;
 };
 
-export default function Banner({ variant, message, action }: Props) {
+export default function Banner({ variant, message, action, className = "" }: Props) {
     return (
         <div
-            className={`flex items-center justify-between rounded border px-3 py-2 text-sm ${styles[variant].wrapper}`}
+            className={`flex items-center justify-between rounded border px-3 py-2 text-sm ${styles[variant].wrapper} ${className}`}
         >
             <span>{message}</span>
             {action && (

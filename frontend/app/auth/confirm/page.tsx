@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Banner from "@/components/Banner";
 import { useAuth } from "@/hooks/useAuth";
 
 type Status = "verifying" | "invalid";
@@ -26,13 +27,13 @@ function InvalidCard() {
                 This confirmation link has already been used or is no longer valid. Enter your email address and we will
                 send a new one.
             </p>
-            {error && (
-                <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-            )}
+            {error && <Banner variant="error" className="mb-4" message={error} />}
             {confirmationResent ? (
-                <p className="mb-6 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
-                    A new confirmation link is on its way. Check your email.
-                </p>
+                <Banner
+                    variant="success"
+                    className="mb-6"
+                    message="A new confirmation link is on its way. Check your email."
+                />
             ) : (
                 <form
                     onSubmit={(e) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Banner from "@/components/Banner";
 import { useAuth } from "@/hooks/useAuth";
 
 type Mode = "login" | "register";
@@ -41,9 +42,11 @@ export default function LoginPage() {
                 <p className="mb-6 text-sm text-gray-500">docSearcher</p>
                 {mode === "register" && confirmationSent ? (
                     <>
-                        <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
-                            Account created. Check your email to confirm your address before logging in.
-                        </p>
+                        <Banner
+                            variant="success"
+                            className="mb-4"
+                            message="Account created. Check your email to confirm your address before logging in."
+                        />
                         <button
                             onClick={() => switchMode("login")}
                             className="text-sm text-gray-700 underline hover:text-gray-900"
@@ -53,15 +56,13 @@ export default function LoginPage() {
                     </>
                 ) : (
                     <>
-                        {error && (
-                            <p className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-                                {error}
-                            </p>
-                        )}
+                        {error && <Banner variant="error" className="mb-4" message={error} />}
                         {confirmationResent ? (
-                            <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
-                                A new confirmation link is on its way. Check your email.
-                            </p>
+                            <Banner
+                                variant="success"
+                                className="mb-4"
+                                message="A new confirmation link is on its way. Check your email."
+                            />
                         ) : (
                             needsConfirmation && (
                                 <button
