@@ -264,7 +264,7 @@ function DocumentsPageInner({ me }: { me: Me }) {
                 <ul className="rows">
                     {[1, 2, 3].map((i) => (
                         <li key={i} className="row">
-                            <div className="h-5 w-2/3 animate-pulse rounded bg-lilac" />
+                            <div className="h-5 w-2/3 animate-pulse rounded bg-base" />
                         </li>
                     ))}
                 </ul>

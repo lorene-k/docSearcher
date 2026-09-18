@@ -3,7 +3,7 @@ type Variant = "success" | "error" | "info";
 const styles: Record<Variant, { wrapper: string; button: string }> = {
     success: { wrapper: "bg-success-soft text-success", button: "text-success" },
     error: { wrapper: "bg-danger-soft text-danger", button: "text-danger" },
-    info: { wrapper: "bg-lilac text-plum-deep", button: "text-plum-deep" },
+    info: { wrapper: "bg-base text-plum-deep", button: "text-plum-deep" },
 };
 
 type Props = {

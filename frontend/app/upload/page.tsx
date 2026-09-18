@@ -59,7 +59,7 @@ function UploadPageInner({ me }: { me: Me }) {
                         <label
                             key={key}
                             className={`card flex cursor-pointer items-start gap-3 p-4 transition-colors ${
-                                visibility === key ? "border-plum bg-plum-soft" : "hover:border-lilac-deep"
+                                visibility === key ? "border-plum bg-plum-soft" : "hover:border-line"
                             }`}
                         >
                             <input

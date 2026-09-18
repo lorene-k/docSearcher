@@ -22,7 +22,7 @@ export default function ConversationSidebar({ conversations, activeId, loading, 
             {loading ? (
                 <div className="mt-2 flex flex-col gap-2">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-9 animate-pulse rounded-lg bg-lilac-deep/60" />
+                        <div key={i} className="h-9 animate-pulse rounded-lg bg-base" />
                     ))}
                 </div>
             ) : conversations.length === 0 ? (
@@ -35,8 +35,8 @@ export default function ConversationSidebar({ conversations, activeId, loading, 
                                 onClick={() => onSelect(c.id)}
                                 className={`w-full truncate rounded-lg px-3 py-2 text-left text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-plum/40 ${
                                     c.id === activeId
-                                        ? "bg-white font-medium text-plum-deep"
-                                        : "text-ink hover:bg-white/60"
+                                        ? "bg-base font-medium text-plum-deep"
+                                        : "text-ink hover:bg-base/60"
                                 }`}
                             >
                                 {formatDate(c.created_at)}

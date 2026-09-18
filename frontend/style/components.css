@@ -23,7 +23,7 @@
     }
 
     .link {
-        @apply rounded-sm text-plum underline decoration-lilac-deep underline-offset-4 transition-colors outline-none hover:decoration-plum focus-visible:ring-2 focus-visible:ring-plum/40;
+        @apply rounded-sm text-plum underline decoration-line underline-offset-4 transition-colors outline-none hover:decoration-plum focus-visible:ring-2 focus-visible:ring-plum/40;
     }
 
     /* Buttons: every button shows its focus ring on hover as well as on keyboard focus */
@@ -37,7 +37,7 @@
         @apply border border-plum bg-transparent text-plum ring-plum/40 hover:bg-plum-soft;
     }
     .btn-ghost {
-        @apply bg-transparent text-ink ring-plum/30 hover:bg-lilac;
+        @apply bg-transparent text-ink ring-plum/30 hover:bg-base;
     }
     .btn-danger {
         @apply bg-transparent text-danger ring-danger/30 hover:bg-danger-soft;
@@ -47,17 +47,17 @@
     }
 
     .field {
-        @apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink transition-shadow outline-none placeholder:text-muted/70 focus:border-plum focus:ring-2 focus:ring-plum/25 disabled:bg-base disabled:text-muted;
+        @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-shadow outline-none placeholder:text-muted/70 focus:border-plum focus:ring-2 focus:ring-plum/25 disabled:bg-base disabled:text-muted;
     }
     .label {
         @apply mb-1 block text-xs font-medium text-ink;
     }
 
     .card {
-        @apply rounded-xl border border-line bg-white;
+        @apply rounded-xl border border-line bg-surface;
     }
     .panel {
-        @apply rounded-2xl bg-lilac;
+        @apply rounded-2xl bg-surface;
     }
 
     /* Small status pills, for roles and visibility */
@@ -67,11 +67,11 @@
     .pill-plum {
         @apply bg-plum text-white;
     }
-    .pill-lilac {
-        @apply bg-lilac text-plum-deep;
+    .pill-soft {
+        @apply bg-base text-plum-deep;
     }
     .pill-neutral {
-        @apply bg-base text-muted;
+        @apply bg-base/60 text-muted;
     }
     .pill-success {
         @apply bg-success-soft text-success;

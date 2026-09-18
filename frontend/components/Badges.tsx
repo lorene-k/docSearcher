@@ -3,7 +3,7 @@ import type { Role, Visibility } from "@/lib/model";
 
 // The palette stays the same for every role: the pill only says which role, it does not color-code it
 export function RoleBadge({ role }: { role: Role }) {
-    return <span className={`pill ${role === "member" ? "pill-neutral" : "pill-lilac"}`}>{ROLE_LABEL[role]}</span>;
+    return <span className={`pill ${role === "member" ? "pill-neutral" : "pill-soft"}`}>{ROLE_LABEL[role]}</span>;
 }
 
 const VISIBILITY_GLYPH: Record<Visibility, string> = { private: "●", group: "◐", org: "○" };

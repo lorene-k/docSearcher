@@ -25,7 +25,7 @@ export default function UploadProgress({ step, progress, chunksCreated }: Props)
                                         ? "bg-plum text-white"
                                         : active
                                           ? "bg-plum-deep text-white"
-                                          : "bg-lilac text-muted"
+                                          : "bg-base text-muted"
                                 }`}
                             >
                                 {done ? "✓" : i + 1}
@@ -41,7 +41,7 @@ export default function UploadProgress({ step, progress, chunksCreated }: Props)
                 })}
             </ol>
             {step === "uploading" && (
-                <div className="h-1.5 w-full rounded-full bg-lilac">
+                <div className="h-1.5 w-full rounded-full bg-base">
                     <div
                         className="h-1.5 rounded-full bg-plum transition-all duration-300"
                         style={{ width: `${progress}%` }}

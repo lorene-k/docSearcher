@@ -22,7 +22,7 @@ export default function Dialog({ open, title, onClose, children }: Props) {
             onClick={(e) => {
                 if (e.target === ref.current) onClose();
             }}
-            className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-white p-0 text-ink shadow-none backdrop:bg-ink/30 open:animate-fade-slide-in"
+            className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-0 text-ink shadow-none backdrop:bg-ink/30 open:animate-fade-slide-in"
         >
             <div className="p-6">
                 <h2 className="section-title mb-4">{title}</h2>

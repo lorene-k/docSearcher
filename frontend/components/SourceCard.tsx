@@ -4,7 +4,7 @@ type Props = { source: Source; index: number };
 
 export default function SourceCard({ source, index }: Props) {
     return (
-        <div className="rounded-lg border border-line bg-white p-3">
+        <div className="rounded-lg border border-line bg-surface p-3">
             <div className="mb-1 flex items-center justify-between gap-2">
                 <p className="truncate text-xs font-medium text-ink">
                     Source {index + 1} - {source.filename}

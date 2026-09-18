@@ -460,7 +460,7 @@ function OrgPageInner({ me }: { me: Me }) {
             {org.loading ? (
                 <div className="flex flex-col gap-3">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-12 animate-pulse rounded-xl bg-lilac" />
+                        <div key={i} className="h-12 animate-pulse rounded-xl bg-base" />
                     ))}
                 </div>
             ) : (
