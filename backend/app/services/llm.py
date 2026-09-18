@@ -1,15 +1,24 @@
-"""
-LLM abstraction with Google Gemini as primary and Groq as fallback.
-Auto-retries on 503/429, then switches provider.
-"""
+"""LLM generation with Google Gemini as primary and Groq as fallback."""
 
 import logging
 from abc import ABC, abstractmethod
 
+from groq import Groq
+
 from app.config import settings
 from app.constants import GENERATION_MODEL, GROQ_FALLBACK_MODEL, MAX_OUTPUT_TOKENS
+from app.services.google_client import get_client as get_google_client
 
 logger = logging.getLogger(__name__)
+
+_groq_client: Groq | None = None
+
+
+def get_groq_client() -> Groq:
+    global _groq_client
+    if _groq_client is None:
+        _groq_client = Groq(api_key=settings.groq_api_key)
+    return _groq_client
 
 
 class LLMProvider(ABC):
@@ -19,10 +28,7 @@ class LLMProvider(ABC):
 
 class GeminiProvider(LLMProvider):
     def generate(self, prompt: str) -> str:
-        from app.services.google_client import get_client
-
-        client = get_client()
-        response = client.models.generate_content(
+        response = get_google_client().models.generate_content(
             model=GENERATION_MODEL,
             contents=prompt,
             config={"max_output_tokens": MAX_OUTPUT_TOKENS},
@@ -31,18 +37,8 @@ class GeminiProvider(LLMProvider):
 
 
 class GroqProvider(LLMProvider):
-    _client = None
-
-    def _get_client(self):
-        if self.__class__._client is None:
-            from groq import Groq
-
-            self.__class__._client = Groq(api_key=settings.groq_api_key)
-        return self.__class__._client
-
     def generate(self, prompt: str) -> str:
-        client = self._get_client()
-        response = client.chat.completions.create(
+        response = get_groq_client().chat.completions.create(
             model=GROQ_FALLBACK_MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=MAX_OUTPUT_TOKENS,
