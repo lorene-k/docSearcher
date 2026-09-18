@@ -1,4 +1,8 @@
 EMBEDDING_MODEL = "gemini-embedding-2"
+# Matryoshka truncation: 768 keeps most of the retrieval quality at a quarter of the storage
+EMBEDDING_DIMENSIONS = 768
+# The embedding API caps how many texts one request may carry
+EMBEDDING_BATCH_SIZE = 100
 GENERATION_MODEL = "gemini-2.5-flash"
 GROQ_FALLBACK_MODEL = "llama-3.3-70b-versatile"
 MAX_OUTPUT_TOKENS = 500
