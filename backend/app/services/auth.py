@@ -1,9 +1,19 @@
 from fastapi import HTTPException, status
 from supabase_auth.errors import AuthApiError
+from supabase_auth.types import Session
 
 from app.db.supabase import get_auth_client
 
 EMAIL_NOT_CONFIRMED = "email_not_confirmed"
+
+
+def _session_tokens(session: Session, email: str | None) -> dict:
+    return {
+        "access_token": session.access_token,
+        "refresh_token": session.refresh_token,
+        "expires_in": session.expires_in,
+        "email": email,
+    }
 
 
 # Supabase error code -> (HTTP status, detail the frontend turns into a message).
@@ -36,12 +46,7 @@ def sign_up(email: str, password: str) -> dict | None:
         # Email confirmation is enabled for this project: the account was created
         # but there is no session yet until the user confirms via email.
         return None
-    return {
-        "access_token": res.session.access_token,
-        "refresh_token": res.session.refresh_token,
-        "expires_in": res.session.expires_in,
-        "email": email,
-    }
+    return _session_tokens(res.session, email)
 
 
 def confirm_email(token_hash: str, otp_type: str) -> dict:
@@ -54,12 +59,7 @@ def confirm_email(token_hash: str, otp_type: str) -> dict:
         raise invalid_link
     if res.session is None or res.user is None:
         raise invalid_link
-    return {
-        "access_token": res.session.access_token,
-        "refresh_token": res.session.refresh_token,
-        "expires_in": res.session.expires_in,
-        "email": res.user.email,
-    }
+    return _session_tokens(res.session, res.user.email)
 
 
 def resend_confirmation(email: str) -> None:
@@ -79,12 +79,7 @@ def sign_in(email: str, password: str) -> dict:
         if e.code == EMAIL_NOT_CONFIRMED:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email not confirmed")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    return {
-        "access_token": res.session.access_token,
-        "refresh_token": res.session.refresh_token,
-        "expires_in": res.session.expires_in,
-        "email": email,
-    }
+    return _session_tokens(res.session, email)
 
 
 def refresh(refresh_token: str) -> dict:
@@ -92,11 +87,7 @@ def refresh(refresh_token: str) -> dict:
         res = get_auth_client().auth.refresh_session(refresh_token)
     except AuthApiError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    return {
-        "access_token": res.session.access_token,
-        "refresh_token": res.session.refresh_token,
-        "expires_in": res.session.expires_in,
-    }
+    return _session_tokens(res.session, res.user.email)
 
 
 def get_user_from_token(token: str) -> dict:
