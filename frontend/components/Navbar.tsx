@@ -36,7 +36,7 @@ export default function Navbar() {
         `btn btn-ghost ${pathname === href ? "bg-surface text-plum-deep" : "text-muted"}`;
 
     return (
-        <header className="bg-base">
+        <header className="border-b border-plum bg-base">
             <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:px-12">
                 <Link
                     href="/"
