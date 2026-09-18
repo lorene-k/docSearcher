@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
 import Toast from "@/components/Toast";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -55,9 +56,9 @@ function DocumentsPageInner() {
             {!loading && documents.length === 0 && (
                 <div className="card px-6 py-10 text-center">
                     <p className="mb-2 text-sm text-gray-400">No documents uploaded yet.</p>
-                    <a href="/upload" className="text-sm text-blue-600 underline">
+                    <Link href="/upload" className="text-sm text-blue-600 underline">
                         Upload a document
-                    </a>
+                    </Link>
                 </div>
             )}
 
