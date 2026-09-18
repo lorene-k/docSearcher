@@ -6,7 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.constants import SIMILARITY_HIGH, SIMILARITY_LOW
-from app.services.rag import build_prompt, get_answer, get_context, get_sections, handle_rag
+from app.services.rag import build_prompt, format_excerpts, get_answer, retrieve_chunks
 
 CONVERSATION_ID = "c1111111-1111-1111-1111-111111111111"
 
@@ -29,28 +29,14 @@ def search_results():
         yield search
 
 
-class TestGetContext:
-    def test_both_populated(self):
-        high, low = get_context([HIGH], [LOW])
-        assert "doc_a.pdf" in high and "High relevance text." in high
-        assert "doc_b.pdf" in low and "Low relevance text." in low
+class TestFormatExcerpts:
+    def test_numbers_excerpts_and_names_their_source(self):
+        assert format_excerpts([HIGH, LOW]) == (
+            "Excerpt 1 (source: doc_a.pdf):\nHigh relevance text.\n\nExcerpt 2 (source: doc_b.pdf):\nLow relevance text."
+        )
 
     def test_empty_chunks(self):
-        assert get_context([], []) == ("", "")
-
-
-class TestGetSections:
-    def test_high_present(self):
-        high, _ = get_sections("some context", "")
-        assert "some context" in high
-
-    def test_high_absent_uses_fallback(self):
-        high, _ = get_sections("", "")
-        assert "no direct match" in high
-
-    def test_low_absent_returns_empty(self):
-        _, low = get_sections("some context", "")
-        assert low == ""
+        assert format_excerpts([]) == ""
 
 
 class TestBuildPrompt:
@@ -72,13 +58,17 @@ class TestBuildPrompt:
     def test_history_included(self):
         history = [{"role": "user", "text": "Hello"}, {"role": "assistant", "text": "Hi"}]
         prompt = build_prompt("Follow-up?", [HIGH], [], history=history)
-        assert "Hello" in prompt and "Recent history" in prompt
+        assert "Recent history:\nUser: Hello\nAssistant: Hi" in prompt
+
+    def test_lines_carry_no_indentation(self):
+        prompt = build_prompt("What?", [HIGH], [LOW], history=[{"role": "user", "text": "Hello"}])
+        assert not any(line.startswith(" ") for line in prompt.splitlines())
+        assert prompt.endswith("Question: What?")
 
 
-class TestHandleRag:
-    def test_no_chunks_returns_none(self, search_results):
-        prompt, high, low = handle_rag("query")
-        assert prompt is None and high == [] and low == []
+class TestRetrieveChunks:
+    def test_no_chunks_returns_empty_lists(self, search_results):
+        assert retrieve_chunks("query") == ([], [])
 
     @pytest.mark.parametrize(
         ("scores", "expected_high", "expected_low"),
@@ -91,7 +81,7 @@ class TestHandleRag:
     )
     def test_splits_chunks_by_similarity(self, search_results, scores, expected_high, expected_low):
         search_results.return_value = [make_chunk(f"f{i}.pdf", f"text {i}", s) for i, s in enumerate(scores)]
-        _, high, low = handle_rag("query")
+        high, low = retrieve_chunks("query")
         assert len(high) == expected_high and len(low) == expected_low
 
 
