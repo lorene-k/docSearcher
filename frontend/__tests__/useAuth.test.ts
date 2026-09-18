@@ -26,6 +26,8 @@ const mockLogin = jest.mocked(api.login);
 const mockRegister = jest.mocked(api.register);
 const mockLogout = jest.mocked(api.logout);
 
+const PROFILE = { first_name: "Ada", last_name: "Lovelace", org_name: "Analytical Engines" };
+
 const renderAuth = (): { current: ReturnType<typeof useAuth> } => renderHook(() => useAuth()).result;
 
 const storedEmail = (): string | null => localStorage.getItem("user_email");
@@ -78,12 +80,14 @@ describe("useAuth", () => {
     });
 
     it("register() does not create a session or redirect on success, and flags confirmation as sent", async () => {
-        mockRegister.mockResolvedValueOnce({ email: "new@example.com" });
+        mockRegister.mockResolvedValueOnce();
         const result = renderAuth();
 
         await act(async () => {
-            await result.current.register("new@example.com", "pass456");
+            await result.current.register("new@example.com", "pass456", PROFILE);
         });
+        expect(mockRegister).toHaveBeenCalledWith("new@example.com", "pass456", PROFILE);
+        await act(async () => {});
 
         expect(storedEmail()).toBeNull();
         expect(result.current.user).toBeNull();
@@ -105,7 +109,7 @@ describe("useAuth", () => {
         const result = renderAuth();
 
         await act(async () => {
-            await result.current.register("dupe@example.com", "pass");
+            await result.current.register("dupe@example.com", "pass", PROFILE);
         });
 
         expect(result.current.error).toBe(message);

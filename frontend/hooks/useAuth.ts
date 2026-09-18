@@ -11,6 +11,7 @@ import {
     isEmailNotConfirmedError,
     errorCode,
 } from "@/lib/api";
+import type { SignupProfile } from "@/lib/api";
 import { getSessionEmail, setSessionEmail, subscribeToSession } from "@/lib/session";
 
 const REGISTER_ERRORS: Record<string, string> = {
@@ -61,12 +62,12 @@ export function useAuth() {
         [router],
     );
 
-    const register = useCallback(async (email: string, password: string) => {
+    const register = useCallback(async (email: string, password: string, profile: SignupProfile) => {
         setLoading(true);
         setError("");
         setConfirmationSent(false);
         try {
-            await apiRegister(email, password);
+            await apiRegister(email, password, profile);
             setConfirmationSent(true);
         } catch (err) {
             setError(REGISTER_ERRORS[errorCode(err)] ?? REGISTER_FALLBACK);
