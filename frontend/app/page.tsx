@@ -1,41 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { useMe } from "@/components/MeProvider";
+
+const POINTS = [
+    { title: "Answers with sources", text: "Every answer cites the passages it came from, so you can check it." },
+    {
+        title: "One organization, clear roles",
+        text: "Owners manage people, admins manage documents, members read and ask.",
+    },
+    {
+        title: "Share as widely as you mean to",
+        text: "Keep a document to yourself, open it to one group, or to everyone.",
+    },
+];
 
 export default function Home() {
+    const { me } = useMe();
+
     return (
-        <div className="page-container flex flex-col items-center gap-6 pt-20 text-center">
-            <div>
-                <h1 className="mb-3 text-3xl font-bold text-gray-900">docSearcher</h1>
-                <p className="max-w-md text-base text-gray-500">
-                    Ask questions about your internal documents in plain language. Upload PDFs, ask questions, and get
-                    answers with sources.
+        <div className="page flex flex-col gap-14 pt-16">
+            <section className="max-w-3xl">
+                <h1 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
+                    Ask your team&apos;s documents a question.
+                </h1>
+                <p className="mt-4 max-w-lg text-sm text-muted">
+                    Upload PDFs, decide who in your organization can see them, and get answers that point back to the
+                    exact passage.
                 </p>
-            </div>
-            <div className="flex gap-3">
-                <Link
-                    href="/chat"
-                    className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm text-white transition-colors hover:bg-gray-700"
-                >
-                    Get started
-                </Link>
-                <Link
-                    href="/upload"
-                    className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                    Upload a document
-                </Link>
-            </div>
-            <div className="mt-4 grid w-full max-w-lg grid-cols-3 gap-4">
-                {[
-                    { title: "3-tier RAG", desc: "High, low, and no-match similarity" },
-                    { title: "Gemini Flash", desc: "Fast generation with Groq fallback" },
-                    { title: "History", desc: "Conversations saved per user" },
-                ].map(({ title, desc }) => (
-                    <div key={title} className="card p-4 text-left">
-                        <p className="mb-1 text-xs font-semibold text-gray-800">{title}</p>
-                        <p className="text-xs text-gray-500">{desc}</p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                    {me ? (
+                        <>
+                            <Link href="/chat" className="btn btn-primary">
+                                Open the chat
+                            </Link>
+                            <Link href="/documents" className="btn btn-outline">
+                                Browse documents
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/login?mode=register" className="btn btn-primary">
+                                Create an organization
+                            </Link>
+                            <Link href="/login" className="btn btn-outline">
+                                Log in
+                            </Link>
+                        </>
+                    )}
+                </div>
+            </section>
+            <section className="grid gap-4 sm:grid-cols-3">
+                {POINTS.map(({ title, text }) => (
+                    <div key={title} className="panel p-5">
+                        <p className="text-sm font-medium text-ink">{title}</p>
+                        <p className="hint mt-1">{text}</p>
                     </div>
                 ))}
-            </div>
+            </section>
         </div>
     );
 }

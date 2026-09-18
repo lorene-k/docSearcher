@@ -40,11 +40,11 @@ export default function ChatWindow({ messages, loading, error, onSend }: Props) 
     };
 
     return (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-lg bg-white">
-            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <div className="card flex flex-1 flex-col gap-4 overflow-y-auto p-4">
                 {error && <Banner variant="error" message={error} />}
                 {messages.length === 0 && (
-                    <p className="mt-10 text-center text-sm text-gray-400">Ask a question about your documents.</p>
+                    <p className="hint mt-10 text-center">Ask a question about the documents shared with you.</p>
                 )}
                 {messages.map((msg, i) => (
                     <MessageBubble key={i} text={msg.text} role={msg.role} sources={msg.sources} />
@@ -52,20 +52,17 @@ export default function ChatWindow({ messages, loading, error, onSend }: Props) 
                 {loading && <MessageBubble role="assistant" text="" isTyping={true} />}
                 <div ref={bottomRef} />
             </div>
-            <form onSubmit={handleSubmit} className="flex items-end gap-2 pt-4">
+            <form onSubmit={handleSubmit} className="flex items-end gap-2">
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask your question... (Enter to send)"
+                    placeholder="Ask your question (Enter to send)"
+                    aria-label="Your question"
                     rows={2}
-                    className="flex-1 resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm transition-shadow placeholder:text-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                    className="field flex-1 resize-none"
                 />
-                <button
-                    type="submit"
-                    disabled={loading || !input.trim()}
-                    className="self-stretch rounded-lg bg-gray-900 px-4 py-2 text-sm whitespace-nowrap text-white shadow-sm transition-all duration-200 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
+                <button type="submit" disabled={loading || !input.trim()} className="btn btn-primary self-stretch">
                     {loading ? "..." : "Send"}
                 </button>
             </form>

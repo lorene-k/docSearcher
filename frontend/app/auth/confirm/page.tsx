@@ -10,8 +10,8 @@ type Status = "verifying" | "invalid";
 
 function Card({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50">
-            <div className="w-full max-w-sm card p-8 text-center">{children}</div>
+        <div className="flex flex-1 items-center justify-center px-4 py-12">
+            <div className="card w-full max-w-md p-8 text-center">{children}</div>
         </div>
     );
 }
@@ -22,8 +22,8 @@ function InvalidCard() {
 
     return (
         <Card>
-            <h1 className="mb-1 text-lg font-semibold text-gray-900">Invalid or expired link</h1>
-            <p className="mb-6 text-sm text-gray-500">
+            <h1 className="page-title">Invalid or expired link</h1>
+            <p className="page-lead mb-6">
                 This confirmation link has already been used or is no longer valid. Enter your email address and we will
                 send a new one.
             </p>
@@ -49,18 +49,14 @@ function InvalidCard() {
                         required
                         placeholder="you@example.com"
                         aria-label="Email"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        className="field"
                     />
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full rounded-lg bg-gray-900 py-2 text-sm text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={loading} className="btn btn-primary w-full">
                         {loading ? "..." : "Send a new link"}
                     </button>
                 </form>
             )}
-            <Link href="/login" className="text-sm text-gray-700 underline hover:text-gray-900">
+            <Link href="/login" className="link text-sm">
                 Go to log in
             </Link>
         </Card>
@@ -71,8 +67,8 @@ function ConfirmCard({ status }: { status: Status }) {
     if (status === "invalid") return <InvalidCard />;
     return (
         <Card>
-            <h1 className="mb-1 text-lg font-semibold text-gray-900">Confirming your email</h1>
-            <p className="text-sm text-gray-500">Checking your email address...</p>
+            <h1 className="page-title">Confirming your email</h1>
+            <p className="page-lead">Checking your email address...</p>
         </Card>
     );
 }
