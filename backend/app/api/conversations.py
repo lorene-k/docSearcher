@@ -2,8 +2,9 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from app.constants import MAX_MESSAGE_LENGTH
 from app.db.supabase import create_conversation, get_conversation, get_conversations, get_messages, insert_message
 from app.middleware.auth import get_current_user
 
@@ -33,8 +34,10 @@ def list_messages(conversation_id: uuid.UUID, user: dict = Depends(get_current_u
 
 
 class MessageInput(BaseModel):
-    role: Literal["user", "assistant"]
-    text: str
+    # Assistant turns are written by the server; a client writing them would feed
+    # its own text back into the next prompt.
+    role: Literal["user"]
+    text: str = Field(min_length=1, max_length=MAX_MESSAGE_LENGTH)
     sources: list[dict] | None = None
 
 
