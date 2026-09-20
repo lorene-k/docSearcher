@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 from supabase_auth.errors import AuthApiError
 
-from app.api.auth import build_cookie_kwargs
+from app.api.auth import COOKIE_KWARGS, build_cookie_kwargs
 from app.config import settings
 from app.main import app
 from app.middleware import rate_limit as rate_limit_module
@@ -178,6 +178,13 @@ class TestAuthLogout:
         assert not r.cookies.get("access_token")
         assert not r.cookies.get("refresh_token")
 
+
+    def test_deletion_repeats_the_attributes_the_cookies_were_set_with(self):
+        """A cross-site browser ignores a deletion whose attributes do not match."""
+        header = client.post("/auth/logout").headers["set-cookie"].lower()
+        assert f"samesite={COOKIE_KWARGS['samesite']}" in header
+        assert ("secure" in header) is COOKIE_KWARGS["secure"]
+        assert "path=/" in header
 
 class TestAuthMiddleware:
     """Exercises the real get_current_user instead of overriding it."""

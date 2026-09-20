@@ -88,6 +88,7 @@ def refresh_route(request: Request, response: Response) -> dict:
 
 @auth_router.post("/logout")
 def logout(response: Response) -> dict:
-    response.delete_cookie(ACCESS_TOKEN_COOKIE, path="/")
-    response.delete_cookie(REFRESH_TOKEN_COOKIE, path="/")
+    # Same attributes as when set, or a cross-site browser ignores the deletion
+    response.delete_cookie(ACCESS_TOKEN_COOKIE, **COOKIE_KWARGS)
+    response.delete_cookie(REFRESH_TOKEN_COOKIE, **COOKIE_KWARGS)
     return {"message": "logged out"}
