@@ -38,7 +38,7 @@ function ChatPageInner() {
     };
 
     return (
-        <div className="mx-auto flex h-[calc(100vh-61px)] w-full max-w-7xl gap-6 px-4 py-4 sm:px-8 lg:px-12">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-8 lg:px-12">
             <ConversationSidebar
                 conversations={conversations}
                 activeId={activeId}
