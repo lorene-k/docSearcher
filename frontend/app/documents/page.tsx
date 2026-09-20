@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
-import { VisibilityBadge } from "@/components/Badges";
 import MeGate from "@/components/MeGate";
+import { VisibilityBadge } from "@/components/Badges";
 import Banner from "@/components/Banner";
 import Dialog from "@/components/Dialog";
 import EmptyState from "@/components/EmptyState";
@@ -227,9 +228,9 @@ function DocumentsPageInner({ me }: { me: Me }) {
         <div className="page">
             <PageHeader title="Documents" lead={lead}>
                 {canUpload(me) && (
-                    <a href="/upload" className="btn btn-primary">
+                    <Link href="/upload" className="btn btn-primary">
                         Upload a PDF
-                    </a>
+                    </Link>
                 )}
             </PageHeader>
 
