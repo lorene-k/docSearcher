@@ -52,3 +52,28 @@ def test_data_access_never_uses_the_auth_client():
     service.table.return_value.insert.assert_called_once_with(
         {"conversation_id": "c1", "role": "user", "text": "hi", "sources": []}
     )
+
+
+class TestGetFilenames:
+    """PostgREST caps a response at max_rows, so the read has to be paged."""
+
+    @staticmethod
+    def _client_returning(pages):
+        client = MagicMock()
+        query = client.table.return_value.select.return_value.order.return_value.order.return_value
+        query.range.return_value.execute.side_effect = [MagicMock(data=page) for page in pages]
+        return client
+
+    def test_reads_every_page_until_one_comes_back_short(self):
+        first = [{"filename": f"doc_{i}.pdf"} for i in range(db.PAGE_SIZE)]
+        second = [{"filename": "last.pdf"}]
+        client = self._client_returning([first, second])
+        with patch("app.db.supabase.get_client", return_value=client):
+            filenames = db.get_filenames()
+        assert "last.pdf" in filenames
+        assert len(filenames) == db.PAGE_SIZE + 1
+
+    def test_a_single_short_page_ends_the_read(self):
+        client = self._client_returning([[{"filename": "a.pdf"}, {"filename": "a.pdf"}, {"filename": "b.pdf"}]])
+        with patch("app.db.supabase.get_client", return_value=client):
+            assert db.get_filenames() == ["a.pdf", "b.pdf"]

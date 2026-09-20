@@ -16,6 +16,8 @@ MAX_PDF_PAGES = 6
 SIMILARITY_HIGH = 0.75
 SIMILARITY_LOW = 0.55
 MATCH_CANDIDATES = 20
+# PostgREST refuses to return more rows than this in one response (supabase config max_rows)
+PAGE_SIZE = 1000
 
 ACCESS_TOKEN_COOKIE = "access_token"
 REFRESH_TOKEN_COOKIE = "refresh_token"

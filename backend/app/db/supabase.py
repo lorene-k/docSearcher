@@ -1,5 +1,5 @@
 from app.config import settings
-from app.constants import MATCH_CANDIDATES, SIMILARITY_LOW
+from app.constants import MATCH_CANDIDATES, PAGE_SIZE, SIMILARITY_LOW
 from supabase import Client, create_client
 
 _client: Client | None = None
@@ -44,9 +44,25 @@ def search_similar_chunks(query_embedding: list[float], match_count: int = MATCH
 
 
 def get_filenames() -> list[str]:
+    """Reads every chunk row in pages. PostgREST caps a single response at max_rows
+    (1000), so one unpaged select silently drops documents past that many chunks.
+    The explicit order keeps the pages from overlapping or skipping rows."""
     client = get_client()
-    result = client.table("documents").select("filename").execute()
-    return list({row["filename"] for row in result.data})
+    filenames: set[str] = set()
+    start = 0
+    while True:
+        result = (
+            client.table("documents")
+            .select("filename")
+            .order("filename")
+            .order("id")
+            .range(start, start + PAGE_SIZE - 1)
+            .execute()
+        )
+        filenames.update(row["filename"] for row in result.data)
+        if len(result.data) < PAGE_SIZE:
+            return sorted(filenames)
+        start += PAGE_SIZE
 
 
 def delete_document(filename: str) -> bool:
