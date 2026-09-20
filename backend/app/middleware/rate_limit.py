@@ -9,6 +9,13 @@ _hits: dict[str, list[float]] = defaultdict(list)
 _lock = Lock()
 
 
+def _drop_empty_buckets() -> None:
+    """Called with the lock held. Without it the dict keeps one entry per IP and path
+    for the life of the process."""
+    for key in [key for key, hits in _hits.items() if not hits]:
+        del _hits[key]
+
+
 def rate_limit(max_requests: int, window_seconds: int) -> Callable[[Request], None]:
     """Simple in-memory per-IP sliding-window rate limiter, scoped per route by path."""
 
@@ -27,5 +34,6 @@ def rate_limit(max_requests: int, window_seconds: int) -> Callable[[Request], No
                     detail="Too many requests, please try again later",
                 )
             hits.append(now)
+            _drop_empty_buckets()
 
     return dependency
