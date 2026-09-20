@@ -156,10 +156,20 @@ describe("placeholder fallback", () => {
 
     it("answers from the local store when the endpoint does not exist yet", async () => {
         localStorage.setItem("user_email", "a@b.com");
-        serve({ "GET /org/groups": () => ({ status: 404 }) });
+        // FastAPI's answer for a path it has no route for
+        serve({ "GET /org/groups": () => ({ status: 404, data: { detail: "Not Found" } }) });
 
         await expect(getGroups()).resolves.toEqual([]);
         expect(localStorage.getItem("docsearcher:placeholder-used")).toBe("1");
+    });
+
+    it("lets a 404 raised by the route itself reach the caller", async () => {
+        localStorage.setItem("user_email", "a@b.com");
+        // An implemented route saying the thing is gone, which stale local data must not mask
+        serve({ "GET /org/groups": () => ({ status: 404, data: { detail: "Group not found" } }) });
+
+        await expect(getGroups()).rejects.toMatchObject({ response: { status: 404 } });
+        expect(localStorage.getItem("docsearcher:placeholder-used")).toBeNull();
     });
 
     it("passes real answers straight through", async () => {

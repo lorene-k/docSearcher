@@ -60,9 +60,14 @@ export const errorCode = (error: unknown): string => {
     return typeof detail === "string" ? detail : "";
 };
 
-// A route the backend has not implemented yet answers 404 (unknown path) or 405 (known path, other method)
-const isNotImplemented = (error: unknown): boolean =>
-    axios.isAxiosError(error) && (error.response?.status === 404 || error.response?.status === 405);
+// A route the backend has not implemented yet answers 405 (known path, other method), or
+// 404 with FastAPI's own unknown-route body. A 404 the route itself raised (an invite already
+// withdrawn, a group someone else deleted) carries its own detail and must reach the caller.
+const isNotImplemented = (error: unknown): boolean => {
+    if (!axios.isAxiosError(error)) return false;
+    if (error.response?.status === 405) return true;
+    return error.response?.status === 404 && error.response.data?.detail === "Not Found";
+};
 
 // Calls the planned endpoint and, until it exists, answers from the local placeholder instead
 const withPlaceholder = async <T>(request: () => Promise<T>, fallback: () => T): Promise<T> => {
