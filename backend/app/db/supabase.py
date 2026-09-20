@@ -102,9 +102,24 @@ def get_messages(conversation_id: str) -> list[dict]:
         .select("*")
         .eq("conversation_id", conversation_id)
         .order("created_at", desc=False)
+        # A pair written in one statement shares created_at; descending role puts the
+        # question ("user") before its answer ("assistant").
+        .order("role", desc=True)
         .execute()
     )
     return result.data
+
+
+def insert_exchange(conversation_id: str, question: str, answer: str, sources: list[dict]) -> None:
+    """Writes the question and the answer in one statement, so a failure cannot leave
+    a question sitting in the history with no reply."""
+    client = get_client()
+    client.table("messages").insert(
+        [
+            {"conversation_id": conversation_id, "role": "user", "text": question, "sources": []},
+            {"conversation_id": conversation_id, "role": "assistant", "text": answer, "sources": sources},
+        ]
+    ).execute()
 
 
 def insert_message(conversation_id: str, role: str, text: str, sources: list[dict] | None = None) -> dict:

@@ -3,7 +3,7 @@ import logging
 from fastapi import HTTPException, status
 
 from app.constants import SIMILARITY_HIGH
-from app.db.supabase import get_conversation, get_messages, insert_message, search_similar_chunks
+from app.db.supabase import get_conversation, get_messages, insert_exchange, search_similar_chunks
 from app.services.embedding import embed_query
 from app.services.llm import generate_with_fallback
 
@@ -80,7 +80,6 @@ def get_answer(query: str, user_id: str, conversation_id: str | None = None) -> 
         sources = to_sources(chunks_high, "high") + to_sources(chunks_low, "low")
 
     if conversation_id:
-        insert_message(conversation_id, "user", query)
-        insert_message(conversation_id, "assistant", answer, sources)
+        insert_exchange(conversation_id, query, answer, sources)
 
     return {"answer": answer, "sources": sources}

@@ -1,6 +1,6 @@
 """Tests for RAG pipeline: similarity filtering and prompt building."""
 
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException
@@ -123,24 +123,24 @@ class TestGetAnswer:
             patch("app.services.rag.get_conversation", return_value=conversation),
             patch("app.services.rag.get_messages") as get_messages,
             patch("app.services.rag.embed_query") as embed_query,
-            patch("app.services.rag.insert_message") as insert_message,
+            patch("app.services.rag.insert_exchange") as insert_exchange,
             pytest.raises(HTTPException) as exc,
         ):
             get_answer("query", "user-1", conversation_id=CONVERSATION_ID)
         assert exc.value.status_code == 404
         get_messages.assert_not_called()
         embed_query.assert_not_called()
-        insert_message.assert_not_called()
+        insert_exchange.assert_not_called()
 
     def test_nonexistent_conversation_is_rejected(self):
         with (
             patch("app.services.rag.get_conversation", return_value=None),
-            patch("app.services.rag.insert_message") as insert_message,
+            patch("app.services.rag.insert_exchange") as insert_exchange,
             pytest.raises(HTTPException) as exc,
         ):
             get_answer("query", "user-1", conversation_id=CONVERSATION_ID)
         assert exc.value.status_code == 404
-        insert_message.assert_not_called()
+        insert_exchange.assert_not_called()
 
     def test_owned_conversation_uses_history_and_persists_both_messages(self, search_results):
         search_results.return_value = [self.HIGH_CHUNK]
@@ -150,20 +150,17 @@ class TestGetAnswer:
             patch("app.services.rag.get_conversation", return_value=conversation),
             patch("app.services.rag.get_messages", return_value=history),
             patch("app.services.rag.generate_with_fallback", return_value="answer") as generate,
-            patch("app.services.rag.insert_message") as insert_message,
+            patch("app.services.rag.insert_exchange") as insert_exchange,
         ):
             result = get_answer("query", "user-1", conversation_id=CONVERSATION_ID)
         assert "earlier question" in generate.call_args.args[0]
-        assert insert_message.call_args_list == [
-            call(CONVERSATION_ID, "user", "query"),
-            call(CONVERSATION_ID, "assistant", "answer", result["sources"]),
-        ]
+        insert_exchange.assert_called_once_with(CONVERSATION_ID, "query", "answer", result["sources"])
 
     def test_no_conversation_skips_lookup_and_persistence(self, search_results):
         with (
             patch("app.services.rag.get_conversation") as get_conversation,
-            patch("app.services.rag.insert_message") as insert_message,
+            patch("app.services.rag.insert_exchange") as insert_exchange,
         ):
             get_answer("query", "user-1")
         get_conversation.assert_not_called()
-        insert_message.assert_not_called()
+        insert_exchange.assert_not_called()

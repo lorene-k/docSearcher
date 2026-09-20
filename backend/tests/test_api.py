@@ -179,13 +179,13 @@ class TestAuthLogout:
         assert not r.cookies.get("access_token")
         assert not r.cookies.get("refresh_token")
 
-
     def test_deletion_repeats_the_attributes_the_cookies_were_set_with(self):
         """A cross-site browser ignores a deletion whose attributes do not match."""
         header = client.post("/auth/logout").headers["set-cookie"].lower()
         assert f"samesite={COOKIE_KWARGS['samesite']}" in header
         assert ("secure" in header) is COOKIE_KWARGS["secure"]
         assert "path=/" in header
+
 
 class TestAuthMiddleware:
     """Exercises the real get_current_user instead of overriding it."""
@@ -325,7 +325,7 @@ class TestChat:
             patch("app.services.rag.get_conversation", return_value=other_users_conversation()),
             patch("app.services.rag.get_messages") as get_messages,
             patch("app.services.rag.embed_query") as embed_query,
-            patch("app.services.rag.insert_message") as insert_message,
+            patch("app.services.rag.insert_exchange") as insert_exchange,
         ):
             r = client.post(
                 "/chat",
@@ -335,7 +335,7 @@ class TestChat:
         assert r.status_code == 404
         get_messages.assert_not_called()
         embed_query.assert_not_called()
-        insert_message.assert_not_called()
+        insert_exchange.assert_not_called()
 
 
 class TestDocuments:
