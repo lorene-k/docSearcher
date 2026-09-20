@@ -285,7 +285,12 @@ export const deleteGroup = (email: string, groupId: string): Group[] =>
         if (store.groups[groupId]?.org_id === org.id) {
             delete store.groups[groupId];
             for (const meta of Object.values(store.documents)) {
-                if (meta.group_id === groupId) meta.group_id = null;
+                // Losing its group would leave the row reading "One group" with no name,
+                // so it falls back to private, which is what the backend is told to do too
+                if (meta.group_id === groupId) {
+                    meta.group_id = null;
+                    meta.visibility = "private";
+                }
             }
         }
         return orgGroups(store, org.id);
