@@ -21,6 +21,14 @@ def get_groq_client() -> Groq:
     return _groq_client
 
 
+def require_text(text: str | None, provider: str) -> str:
+    """A blocked or empty completion must fall through to the next provider rather
+    than travel on as an answer and fail later against a not-null column."""
+    if not text or not text.strip():
+        raise RuntimeError(f"{provider} returned an empty answer")
+    return text
+
+
 class LLMProvider(ABC):
     @abstractmethod
     def generate(self, prompt: str) -> str: ...
@@ -33,7 +41,7 @@ class GeminiProvider(LLMProvider):
             contents=prompt,
             config={"max_output_tokens": MAX_OUTPUT_TOKENS},
         )
-        return response.text
+        return require_text(response.text, "Gemini")
 
 
 class GroqProvider(LLMProvider):
@@ -43,7 +51,7 @@ class GroqProvider(LLMProvider):
             messages=[{"role": "user", "content": prompt}],
             max_tokens=MAX_OUTPUT_TOKENS,
         )
-        return response.choices[0].message.content
+        return require_text(response.choices[0].message.content, "Groq")
 
 
 def generate_with_fallback(prompt: str) -> str:
