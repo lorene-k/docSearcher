@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import { VisibilityBadge } from "@/components/Badges";
+import MeGate from "@/components/MeGate";
 import Banner from "@/components/Banner";
 import Dialog from "@/components/Dialog";
 import EmptyState from "@/components/EmptyState";
-import { useMe } from "@/components/MeProvider";
 import PageHeader from "@/components/PageHeader";
 import Toast from "@/components/Toast";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -306,6 +306,9 @@ function DocumentsPageInner({ me }: { me: Me }) {
 }
 
 export default function DocumentsPage() {
-    const { me } = useMe();
-    return <AuthGuard>{me && <DocumentsPageInner me={me} />}</AuthGuard>;
+    return (
+        <AuthGuard>
+            <MeGate>{(me) => <DocumentsPageInner me={me} />}</MeGate>
+        </AuthGuard>
+    );
 }

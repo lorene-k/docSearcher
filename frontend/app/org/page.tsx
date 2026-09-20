@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
+import MeGate from "@/components/MeGate";
 import { RoleBadge } from "@/components/Badges";
 import Banner from "@/components/Banner";
 import Dialog from "@/components/Dialog";
@@ -474,6 +475,9 @@ function OrgPageInner({ me }: { me: Me }) {
 }
 
 export default function OrgPage() {
-    const { me } = useMe();
-    return <AuthGuard>{me && <OrgPageInner me={me} />}</AuthGuard>;
+    return (
+        <AuthGuard>
+            <MeGate>{(me) => <OrgPageInner me={me} />}</MeGate>
+        </AuthGuard>
+    );
 }

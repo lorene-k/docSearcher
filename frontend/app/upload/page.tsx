@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
-import { useMe } from "@/components/MeProvider";
+import MeGate from "@/components/MeGate";
 import PageHeader from "@/components/PageHeader";
 import UploadZone from "@/components/UploadZone";
 import { getGroups } from "@/lib/api";
@@ -116,6 +116,9 @@ function UploadPageInner({ me }: { me: Me }) {
 }
 
 export default function UploadPage() {
-    const { me } = useMe();
-    return <AuthGuard>{me && <UploadPageInner me={me} />}</AuthGuard>;
+    return (
+        <AuthGuard>
+            <MeGate>{(me) => <UploadPageInner me={me} />}</MeGate>
+        </AuthGuard>
+    );
 }

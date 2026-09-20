@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
+import MeGate from "@/components/MeGate";
 import { RoleBadge } from "@/components/Badges";
 import Banner from "@/components/Banner";
 import { useMe } from "@/components/MeProvider";
@@ -263,6 +264,9 @@ function AccountPageInner({ me }: { me: Me }) {
 }
 
 export default function AccountPage() {
-    const { me } = useMe();
-    return <AuthGuard>{me && <AccountPageInner me={me} />}</AuthGuard>;
+    return (
+        <AuthGuard>
+            <MeGate>{(me) => <AccountPageInner me={me} />}</MeGate>
+        </AuthGuard>
+    );
 }
