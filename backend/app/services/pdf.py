@@ -2,20 +2,32 @@ import io
 
 from fastapi import HTTPException, status
 from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 
 from app.constants import CHUNK_OVERLAP, CHUNK_SIZE, MAX_PDF_PAGES
 
+UNREADABLE_PDF = "PDF could not be read - it may be corrupt or password-protected"
+
 
 def extract_text(file_bytes: bytes) -> str:
-    reader = PdfReader(io.BytesIO(file_bytes))
-    if len(reader.pages) > MAX_PDF_PAGES:
+    # Covers corrupt files, truncated streams and password-protected ones, which all
+    # raise from pypdf rather than returning anything readable.
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+        page_count = len(reader.pages)
+    except PyPdfError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=UNREADABLE_PDF)
+    if page_count > MAX_PDF_PAGES:
         raise HTTPException(
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"PDF exceeds {MAX_PDF_PAGES} page limit",
         )
     text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
+    try:
+        for page in reader.pages:
+            text += page.extract_text() or ""
+    except PyPdfError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=UNREADABLE_PDF)
     return text
 
 

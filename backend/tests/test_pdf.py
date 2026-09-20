@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
+from pypdf.errors import PdfReadError
 
 from app.constants import CHUNK_OVERLAP, CHUNK_SIZE, MAX_PDF_PAGES
 from app.services.pdf import create_chunks, extract_text, process_pdf
@@ -83,3 +84,26 @@ class TestProcessPdf:
         with patch("app.services.pdf.extract_text", return_value=""), pytest.raises(HTTPException) as exc_info:
             process_pdf(b"fake")
         assert exc_info.value.status_code == 400
+
+
+class TestUnreadablePdf:
+    """pypdf raises for corrupt, truncated and password-protected files."""
+
+    def test_unopenable_file_is_a_bad_request(self):
+        with (
+            patch("app.services.pdf.PdfReader", side_effect=PdfReadError("EOF marker not found")),
+            pytest.raises(HTTPException) as exc,
+        ):
+            extract_text(b"not really a pdf")
+        assert exc.value.status_code == 400
+        assert "corrupt or password-protected" in exc.value.detail
+
+    def test_failure_while_reading_pages_is_a_bad_request(self):
+        page = MagicMock()
+        page.extract_text.side_effect = PdfReadError("file has not been decrypted")
+        with (
+            patch("app.services.pdf.PdfReader", return_value=MagicMock(pages=[page])),
+            pytest.raises(HTTPException) as exc,
+        ):
+            extract_text(b"%PDF-encrypted")
+        assert exc.value.status_code == 400
