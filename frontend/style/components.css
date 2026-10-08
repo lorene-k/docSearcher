@@ -25,7 +25,7 @@
 
     /* Buttons(focus ring on hover + keyboard focus) */
     .btn {
-        @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap ring-offset-2 ring-offset-base transition-colors outline-none hover:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:ring-0;
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none hover:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:ring-0;
     }
     .btn-primary {
         @apply bg-plum text-white ring-plum/40 hover:bg-plum-deep;
