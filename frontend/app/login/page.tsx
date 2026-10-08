@@ -43,7 +43,7 @@ function LoginForm() {
         resendConfirmation,
     } = useAuth();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (mode === "login") await login(email, password);
         else await register(email, password, { first_name: firstName, last_name: lastName, org_name: orgName });

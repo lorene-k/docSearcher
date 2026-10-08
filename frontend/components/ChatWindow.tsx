@@ -27,7 +27,7 @@ export default function ChatWindow({ messages, loading, error, onSend }: Props) 
         onSend(text);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault();
         submit();
     };

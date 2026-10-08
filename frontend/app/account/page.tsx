@@ -20,7 +20,7 @@ function ProfileForm({ me }: { me: Me }) {
     const [status, setStatus] = useState<{ variant: "success" | "error"; message: string } | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const save = async (e: React.FormEvent) => {
+    const save = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
@@ -85,7 +85,7 @@ function PasswordForm() {
     const [status, setStatus] = useState<{ variant: "success" | "error"; message: string } | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const save = async (e: React.FormEvent) => {
+    const save = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (next !== again) {
             setStatus({ variant: "error", message: "The new passwords do not match." });

@@ -52,7 +52,7 @@ function ShareDialog({
         setGroupId(groups[0]?.id ?? "");
     }
 
-    const submit = async (e: React.FormEvent) => {
+    const submit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setSaving(true);
         await onShare(visibility, visibility === "group" ? groupId : null);

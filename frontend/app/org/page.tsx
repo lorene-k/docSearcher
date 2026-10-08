@@ -21,7 +21,7 @@ function OrgName({ me, onRenamed }: { me: Me; onRenamed: () => Promise<void> }) 
     const [name, setName] = useState(me.org.name);
     const [saving, setSaving] = useState(false);
 
-    const save = async (e: React.FormEvent) => {
+    const save = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
         setSaving(true);
@@ -192,7 +192,7 @@ function MemberRow({ member, me, org }: { member: Member; me: Me; org: OrgState 
 function Members({ me, org }: { me: Me; org: OrgState }) {
     const [email, setEmail] = useState("");
 
-    const invite = async (e: React.FormEvent) => {
+    const invite = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (await org.invite(email)) setEmail("");
     };
@@ -276,7 +276,7 @@ function GroupDialog({ group, me, org, onClose }: { group: Group | null; me: Me;
     const toggle = (id: string) =>
         setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-    const save = async (e: React.FormEvent) => {
+    const save = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (name.trim() !== group.name) await org.renameGroup(group.id, name);
         await org.setGroupMembers(group.id, selected);
@@ -376,7 +376,7 @@ function Groups({ me, org }: { me: Me; org: OrgState }) {
     const [editing, setEditing] = useState<Group | null>(null);
     const memberById = (id: string) => org.members.find((m) => m.id === id);
 
-    const create = async (e: React.FormEvent) => {
+    const create = async (e: React.SubmitEvent) => {
         e.preventDefault();
         if (await org.createGroup(name)) setName("");
     };
