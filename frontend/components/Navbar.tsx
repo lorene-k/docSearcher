@@ -40,7 +40,7 @@ export default function Navbar() {
             <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:px-12">
                 <Link
                     href="/"
-                    className="rounded-sm text-lg font-medium tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-plum/40"
+                    className="text-lg font-medium tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-plum/40"
                 >
                     doc<span className="text-plum">Searcher</span>
                 </Link>

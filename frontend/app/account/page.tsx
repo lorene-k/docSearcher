@@ -220,7 +220,7 @@ function PlaceholderPanel({ me }: { me: Me }) {
     if (!visible) return null;
 
     return (
-        <section className="mb-10 rounded-2xl border border-dashed border-warning/60 p-5">
+        <section className="mb-10 border border-dashed border-warning/60 p-5">
             <h2 className="section-title">Preview mode</h2>
             <p className="hint mt-1">
                 Organization, roles and groups are stored in this browser until the backend provides them. Preview the

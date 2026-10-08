@@ -72,13 +72,12 @@ export default function UploadZone({ options, disabled = false }: Props) {
                 }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={onDrop}
-                className={`rounded-2xl border-2 border-dashed p-12 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-plum/40 ${
-                    disabled
+                className={`border-2 border-dashed p-12 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-plum/40 ${disabled
                         ? "cursor-not-allowed border-line bg-base/60 text-muted"
                         : isDragging
-                          ? "border-plum bg-plum-soft"
-                          : "cursor-pointer border-line bg-surface hover:border-plum hover:bg-plum-soft"
-                }`}
+                            ? "border-plum bg-plum-soft"
+                            : "cursor-pointer border-line bg-surface hover:border-plum hover:bg-plum-soft"
+                    }`}
             >
                 <p className="text-sm text-ink">
                     Drop a PDF here or{" "}

@@ -41,9 +41,9 @@ export default function UploadProgress({ step, progress, chunksCreated }: Props)
                 })}
             </ol>
             {step === "uploading" && (
-                <div className="h-1.5 w-full rounded-full bg-base">
+                <div className="h-1.5 w-full bg-base">
                     <div
-                        className="h-1.5 rounded-full bg-plum transition-all duration-300"
+                        className="h-1.5 bg-plum transition-all duration-300"
                         style={{ width: `${progress}%` }}
                     />
                 </div>

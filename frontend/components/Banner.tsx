@@ -17,7 +17,7 @@ export default function Banner({ variant, message, action, className = "" }: Pro
     return (
         <div
             role={variant === "error" ? "alert" : "status"}
-            className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm ${styles[variant].wrapper} ${className}`}
+            className={`flex items-center justify-between gap-3 px-3 py-2 text-sm ${styles[variant].wrapper} ${className}`}
         >
             <span>{message}</span>
             {action && (

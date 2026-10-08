@@ -1,7 +1,4 @@
-/* Shared component classes, per the design brief: one place for styles used by several elements */
-
 @layer components {
-    /* Pages spread across wide screens and keep a comfortable margin on the sides */
     .page {
         @apply mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12;
     }
@@ -23,12 +20,12 @@
     }
 
     .link {
-        @apply rounded-sm text-plum underline decoration-line underline-offset-4 transition-colors outline-none hover:decoration-plum focus-visible:ring-2 focus-visible:ring-plum/40;
+        @apply text-plum underline decoration-line underline-offset-4 transition-colors outline-none hover:decoration-plum focus-visible:ring-2 focus-visible:ring-plum/40;
     }
 
-    /* Buttons: every button shows its focus ring on hover as well as on keyboard focus */
+    /* Buttons(focus ring on hover + keyboard focus) */
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap ring-offset-2 ring-offset-base transition-colors outline-none hover:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:ring-0;
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap ring-offset-2 ring-offset-base transition-colors outline-none hover:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:ring-0;
     }
     .btn-primary {
         @apply bg-plum text-white ring-plum/40 hover:bg-plum-deep;
@@ -47,22 +44,22 @@
     }
 
     .field {
-        @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-shadow outline-none placeholder:text-muted/70 focus:border-plum focus:ring-2 focus:ring-plum/25 disabled:bg-base disabled:text-muted;
+        @apply w-full border border-line bg-surface px-3 py-2 text-sm text-ink transition-shadow outline-none placeholder:text-muted/70 focus:border-plum focus:ring-2 focus:ring-plum/25 disabled:bg-base disabled:text-muted;
     }
     .label {
         @apply mb-1 block text-xs font-medium text-ink;
     }
 
     .card {
-        @apply rounded-xl border border-line bg-surface;
+        @apply border border-line bg-surface;
     }
     .panel {
-        @apply rounded-2xl bg-surface;
+        @apply bg-surface;
     }
 
-    /* Small status pills, for roles and visibility */
+    /* Small status container (roles & visibility) */
     .pill {
-        @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+        @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium;
     }
     .pill-plum {
         @apply bg-plum text-white;
@@ -83,7 +80,7 @@
         @apply bg-danger-soft text-danger;
     }
 
-    /* Rows of a list separated by hairlines, used for members, groups and documents */
+    /* Rows of a list (for members, groups & docs) */
     .rows > * + * {
         @apply border-t border-line;
     }
