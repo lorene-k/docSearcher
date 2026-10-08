@@ -7,7 +7,7 @@
     }
 
     .page-title {
-        @apply text-2xl font-medium tracking-tight text-ink;
+        @apply font-title text-2xl font-medium tracking-tight text-ink;
     }
 
     .page-lead {
@@ -15,7 +15,7 @@
     }
 
     .section-title {
-        @apply font-medium text-base text-ink;
+        @apply font-title font-medium text-base text-ink;
     }
 
     .hint {

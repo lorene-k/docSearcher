@@ -2,7 +2,8 @@
 @import "../style/components.css";
 
 @theme inline {
-    --font-sans: Futura, "Futura PT", var(--font-jost), "Century Gothic", sans-serif;
+    --font-sans: var(--font-inter), sans-serif;
+    --font-title: var(--font-garamond), Garamond, serif;
 }
 
 @theme {

@@ -21,8 +21,8 @@ export default function Home() {
     return (
         <div className="page flex flex-col gap-14 pt-16">
             <section className="max-w-3xl">
-                <h1 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
-                    Ask your team&apos;s documents a question.
+                <h1 className="font-title text-4xl font-medium tracking-tight text-ink sm:text-5xl">
+                    Ask your team's documents a question.
                 </h1>
                 <p className="mt-4 max-w-lg text-sm text-muted">
                     Upload PDFs, decide who in your organization can see them, and get answers that point back to the
